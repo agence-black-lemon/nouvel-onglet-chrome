@@ -48,6 +48,7 @@
         background:var(--red);margin-left:8px;vertical-align:middle}
   .ico{width:32px;height:32px;border-radius:8px;background:#fff;display:grid;place-items:center;flex:none;overflow:hidden}
   .ico img{width:20px;height:20px}
+  .ico img.plein{width:100%;height:100%;object-fit:cover}
   .ico span{color:#000;font-family:var(--display);font-weight:800;font-size:13px}
   .name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
@@ -62,6 +63,24 @@
   .cal-tools button{background:none;border:0;color:inherit;font:inherit;cursor:pointer;text-decoration:underline}
 
   footer{margin-top:24px;color:#444;font-size:12px}
+  .ticket-cta{display:flex;align-items:center;gap:14px;width:100%;max-width:420px;text-align:left;cursor:pointer;
+       background:var(--tile);border:1px solid var(--line);border-radius:14px;padding:14px;color:var(--fg);font:inherit}
+  .ticket-cta:hover{background:var(--tile-h);border-color:var(--red)}
+  .ticket-cta .sub{color:var(--muted);font-size:13px}
+  .ticket-ico{width:32px;height:32px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;
+       font-family:var(--display);font-weight:800;flex:none}
+  dialog#ticket{margin:auto;width:min(520px,calc(100% - 32px));background:#0d0d0d;color:var(--fg);border:1px solid #2a2a2a;
+       border-radius:18px;padding:24px}
+  dialog#ticket::backdrop{background:rgba(0,0,0,.7)}
+  .t-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  .t-head h3{font-family:var(--display);font-stretch:125%;font-weight:800;text-transform:uppercase;font-size:18px}
+  .t-close{background:none;border:0;color:var(--muted);font-size:26px;cursor:pointer;line-height:1}
+  #ticketForm label{display:block;color:var(--muted);font-size:12px;margin-bottom:12px}
+  #ticketForm .opt{color:#555}
+  #ticketForm select,#ticketForm input,#ticketForm textarea{display:block;width:100%;margin-top:6px;background:#000;color:#fff;
+       border:1px solid #333;border-radius:10px;padding:11px 12px;font:inherit;font-size:14px;resize:vertical}
+  #ticketForm select:focus,#ticketForm input:focus,#ticketForm textarea:focus{outline:none;border-color:#666}
+  .t-note{color:var(--muted);font-size:12px;line-height:1.5;margin:4px 0 14px}
   .annonce{margin:-20px 0 36px;padding:14px 20px;border-left:3px solid var(--red);background:var(--tile);
            border-radius:0 12px 12px 0;line-height:1.5;white-space:pre-line}
 
@@ -98,7 +117,16 @@
 </form>
 
 <main>
-  <section id="tools"></section>
+  <section>
+    <div id="tools"></div>
+    <div class="group">
+      <h2>Support IT</h2>
+      <button class="ticket-cta" id="ticketOpen" type="button">
+        <span class="ticket-ico">!</span>
+        <span><strong>Un problème avec ton ordi ?</strong><br><span class="sub">Le tunnel avec l'IT c'est par ici</span></span>
+      </button>
+    </div>
+  </section>
   <aside>
     <h2>Mon agenda</h2>
     <div id="calendar"></div>
@@ -107,12 +135,54 @@
 
 <footer>Un lien manque ou ne marche plus ? Écris à Florian sur Slack.</footer>
 
+<dialog id="ticket">
+  <form id="ticketForm" method="dialog">
+    <div class="t-head">
+      <h3>Ticket support IT</h3>
+      <button type="button" class="t-close" id="ticketClose" aria-label="Fermer">×</button>
+    </div>
+    <label>Type de problème
+      <select id="tType" required>
+        <option value="">Choisir…</option>
+        <option>Ordinateur (lenteur, plantage, démarrage)</option>
+        <option>Internet / Wi-Fi</option>
+        <option>Imprimante</option>
+        <option>Messagerie / compte Google</option>
+        <option>Le Commun (serveur, fichiers partagés)</option>
+        <option>Logiciel / installation</option>
+        <option>Autre</option>
+      </select>
+    </label>
+    <label>Urgence
+      <select id="tUrg">
+        <option value="Normale">Normale — je peux continuer à travailler</option>
+        <option value="Haute">Haute — je suis gêné·e dans mon travail</option>
+        <option value="Bloquante">Bloquante — je ne peux plus travailler</option>
+      </select>
+    </label>
+    <label>Résumé en quelques mots
+      <input id="tSujet" required maxlength="80" placeholder="ex. Le Wi-Fi coupe toutes les 10 min">
+    </label>
+    <label>Description
+      <textarea id="tDesc" required rows="5" placeholder="Que se passe-t-il ? Depuis quand ? Un message d'erreur ? Qu'as-tu déjà essayé ?"></textarea>
+    </label>
+    <label>Appareil concerné <span class="opt">(facultatif)</span>
+      <input id="tPoste" placeholder="ex. MacBook Air de Florian, imprimante de l'entrée">
+    </label>
+    <p class="t-note">Le mail s'ouvre dans Gmail, prêt à envoyer. Tu peux y joindre une capture d'écran avant d'envoyer.</p>
+    <button class="btn" type="submit">Préparer le mail</button>
+  </form>
+</dialog>
+
 <script>
 /* ============================================================
    CONFIGURATION — c'est la seule partie à modifier au quotidien.
-   url: "#" = lien à compléter.
+   url: "#" = lien à compléter. icone: "…" (optionnel) = image perso à la place du favicon ; plein: true = l'image remplit tout le carré.
    ============================================================ */
 const DOMAINE = "blacklemon.net";
+
+// Adresse du prestataire informatique (tickets)
+const SUPPORT_EMAIL = "support-blacklemon@d-ns.fr";
 
 // MESSAGE POUR TOUT LE MONDE — s'affiche en bandeau sous la recherche.
 // Laisser vide ("") pour ne rien afficher.
@@ -128,7 +198,7 @@ const OUTILS = [
   { groupe: "Projets & docs", liens: [
     { nom: "Notion",       url: "https://www.notion.so/" },
     { nom: "Google Drive", url: "https://drive.google.com/" },
-    { nom: "Furious",      url: "https://agenceblacklemon.furious-squad.com/" },
+    { nom: "Furious",      url: "https://agenceblacklemon.furious-squad.com/", icone: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFcElEQVR42u2bXYxdVRXHf2vtc+61jekYOq011ge/iD7UVjNCVJKxLdE6aaohTCPJYIJGDOFjHiRSDETmSQxI1CYl9E2DURgJxuBQ0tZJGZgQxYQY4cFJVVKJYyyhJaXTe/bZa/FwZyjagc4MZc6c2/t/usk9L+u31/fZBy5yyfkeGLveP+oNvoDRJ8Z6V7RuRgYFc06g/GRgr7ywIABjN/hng/LtZOwWpSdTUFkAsRV6zAK8VvD0hsTWvv0S5/7K5nv+9zf6sML3s8B6A3CIqeauLqCw+e8ZTWB+AD7oYayXuxTuUIFW2fk54H/ieayX4TxwO0BpF0cSzN4c86rcBgT3i6cKzHqAiwi35IH1HX7yMi+AsZv5iDmDRepsyx1epkk61wOcL6rSpINdX9tnP/X8mrMV4CyAxCczpZPtJ1MQmBwZkfJcAMLGIJ1rfFAoEq8aHJg3Bzj1a28XC6BMPLLzfpl82z6gU12/FZlGGTlvI9RpygPExHQShnbukxffEkCnhUBQaAZIxj9TYmjXPjn8tp2gwH9E2qWirpVAZktdUIiJ42cSvzPj7l37Zeq8rbDCvpnIZpzNdTTe2wSOmzNVGE+bM7brfvnTolrDZ6/3fHZUrKeapHVriFv/r8531VVXXS1qPp7Tya/tXbt6ddmP6OXu/iFFc2Npy4KgirnN4H4Mwnj23uak7P/O6RUJwK/duzZ6ukZNbxLh46qqaLgAtcrBDXMvHf9rcv9ho/jAIzK6O60YAD50z/rkzZ8HDTvASWb4BW6NBJnziJTMHzwVZ4YvGd1zsnIAfs29vSnkvw7a2J5S8a53hCqChpwYW7/KY/qWjH53ppJFydyPQrPbgja2l8tgPIC5YymiGq4uch2q1AN86Gcfjm5/zCT0Jl/erWimgZjKv+V6yWfkwW+8VokHROcrmYRe8+VfCSczQD4GJy6vLAQE3yQaKpoEnUxVo1lfZQAc1iFSkfkgIoh6T5VJsFX5JsA0VRcCwlHMKnn1LQjJDIOp6kLA7FBMqazi7b+K4G4vN2I4WBmA/KUTkwiHQ8iW3wM0gPBLGb1puroQODJS5iH7XlmW/8p0+SBkIadM8blYlvdWlXre6ATlFzf+BcrrkqXpLGTIuxgOKtI2voz/8MgNqx+69diKmQaLr9/XpyGMBAkDqIIl7AJVCBUFCaRURHN+mxK3r3po+OiK2wf44N09Zd7cjusA6pc5bBQkX+pk2PYmj+YcbYgePFMWh4+dzJ+69MBwa8UuRN6AcfNPm7xSZLRWvbOYaM44rVNRRkeK7h6qq666Wil6y8TmB6+4FNMrMbYg/j5cWrhNITpOT/GsfP6ZmY4E4Ie2fZBY3IrIdaj0kGm7XXKgdHCPIM9g/gPZ8eR4RwHwJ/q3gD9ArpfNGnvulCy0r12Y/xezO+XLEw90BAA/tO39lPFR3pN9jjMLGM0zAfNEyaAMPPloXQGcvRkSyz00wsKMZzYcggbE7/TH+jfUGoAf6P8E4t+kXGSrWxo0wqfRdFW9PcBkG6prsEUCcNp5QmXQx/uz+gJQ20S2xFbfAJdPUTSa9QUgrJu7TLtouQPepFFIfQG4v8MJTazeOQB5ntKWthNVAfEXmVkVaxwCPkFpS7tdlSuIPCYDB1r1BdDQSZA/kC/ywmgQiPYq+OO1DgHZeqQEH6Gw4wuuBjILIPl9fGliovadoOyYmER0D8lPndcTgrRdv7Df8G/5kUh9v7U4dxp8/IorQe6hoVsASLOlTmY/v8wEok3jvo+1p38sfX8+TY01/1Z4vH8DZ+yrqOzEfRMia3Ei+FFUDlLIw7LzyHMdvRAB8IcHAxuPNWg1A0XDOflSlN0vdLe6naTXAXQcLy3weKdmAAAAAElFTkSuQmCC" },
   ]},
   { groupe: "IA", liens: [
     { nom: "Claude",       url: "https://claude.ai/" },
@@ -140,7 +210,7 @@ const OUTILS = [
     { nom: "Canva",        url: "https://www.canva.com/" },
   ]},
   { groupe: "Admin & RH", liens: [
-    { nom: "Qonto",        url: "https://app.qonto.com/" },
+    { nom: "Qonto",        url: "https://app.qonto.com/", plein: true, icone: "data:image/png;base64,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" },
     { nom: "MySilae",      url: "https://my.silae.fr/sign-in" },
   ]},
 ];
@@ -191,7 +261,9 @@ $("#tools").innerHTML = OUTILS.map(g => `
     <div class="grid">
       ${g.liens.map(l => {
         const host = domaineDe(l.url);
-        const ico = host
+        const ico = l.icone
+          ? `<img src="${l.icone}" alt=""${l.plein ? ' class="plein"' : ""}>`
+          : host
           ? `<img src="https://www.google.com/s2/favicons?domain=${host}&sz=64" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'${l.nom[0]}'}))">`
           : `<span>${l.nom[0]}</span>`;
         return `<a class="tool" href="${l.url}"><div class="ico">${ico}</div><div class="name">${l.nom}</div></a>`;
@@ -235,6 +307,35 @@ function afficherAgenda(){
   $("#calReset").onclick = () => { store.del("bl_agenda_email"); afficherAgenda(); tick(); };
 }
 afficherAgenda();
+
+// Ticket support : ouvre un brouillon Gmail pré-rempli
+const dlg = $("#ticket");
+$("#ticketOpen").onclick = () => dlg.showModal();
+$("#ticketClose").onclick = () => dlg.close();
+$("#ticketForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const email = store.get("bl_agenda_email") || "";
+  const p = prenom();
+  const urg = $("#tUrg").value;
+  const sujet = `[Black Lemon] ${urg === "Normale" ? "" : urg.toUpperCase() + " – "}${$("#tSujet").value.trim()}`;
+  const corps = [
+    "Bonjour,", "",
+    "Je vous sollicite pour la demande de support suivante :", "",
+    `Demandeur : ${p || "—"}${email ? " (" + email + ")" : ""}`,
+    `Type de problème : ${$("#tType").value}`,
+    `Urgence : ${urg}`,
+    `Appareil concerné : ${$("#tPoste").value.trim() || "—"}`, "",
+    "Description :", $("#tDesc").value.trim(), "",
+    "Merci d'avance,", p || "",
+  ].join("\n");
+  const url = "https://mail.google.com/mail/?view=cm&fs=1"
+    + "&to=" + encodeURIComponent(SUPPORT_EMAIL)
+    + "&su=" + encodeURIComponent(sujet)
+    + "&body=" + encodeURIComponent(corps);
+  window.open(url, "_blank");
+  e.target.reset();
+  dlg.close();
+});
 </script>
 </body>
 </html>
