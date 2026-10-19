@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nouvel onglet · Black Lemon</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='860 420 310 310'%3E%3Crect x='860' y='420' width='310' height='310' rx='60' fill='%23000'/%3E%3Cdefs%3E%3CclipPath id='i'%3E%3Ccircle cx='1000' cy='588' r='75'/%3E%3C/clipPath%3E%3C/defs%3E%3Ccircle cx='1000' cy='588' r='122' fill='%23fff'/%3E%3Ccircle cx='1000' cy='588' r='75' fill='%23000'/%3E%3Cpolygon points='1000%2C590 1110%2C700 890%2C700' fill='%23fff' clip-path='url%28%23i%29'/%3E%3Ccircle cx='1132' cy='456' r='20' fill='%23f00'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Archivo (largeur étendue) en remplacement web de Monument Extended -->
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,400;125,800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000; --fg:#fff; --muted:#8a8a8a; --line:#1f1f1f; --tile:#0d0d0d; --tile-h:#171717; --red:#FF0000;
+    --display:"Monument Extended","Archivo",system-ui,sans-serif;
+    --text:"Inter",system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--fg);font-family:var(--text);font-size:14px;
+       -webkit-font-smoothing:antialiased;padding:40px 48px;min-height:100vh}
+  a{color:inherit;text-decoration:none}
+
+  header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:36px}
+  .brand{display:flex;align-items:center;gap:22px}
+  .logo{width:clamp(56px,6vw,84px);height:auto;flex:none}
+  .hello{font-family:var(--display);font-weight:800;font-stretch:125%;font-size:clamp(28px,4vw,52px);
+         line-height:1;letter-spacing:-.01em;text-transform:uppercase}
+  .hello .dot{display:inline-block;width:.2em;height:.2em;border-radius:50%;background:var(--red);
+              margin-left:.08em;vertical-align:baseline}
+  .date{color:var(--muted);margin-top:10px;font-size:15px}
+  .clock{font-family:var(--display);font-stretch:125%;font-size:clamp(22px,2.6vw,34px);font-variant-numeric:tabular-nums}
+
+  form.search{margin-bottom:40px}
+  form.search input{width:100%;background:var(--tile);border:1px solid var(--line);color:var(--fg);
+       font:inherit;font-size:16px;padding:16px 20px;border-radius:999px;outline:none}
+  form.search input:focus{border-color:#444}
+
+  main{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:40px;align-items:start}
+  h2{font-family:var(--display);font-stretch:125%;font-weight:400;font-size:11px;letter-spacing:.14em;
+     text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+  .group{margin-bottom:28px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .tool{display:flex;align-items:center;gap:12px;background:var(--tile);border:1px solid var(--line);
+        border-radius:14px;padding:14px;transition:background .15s,border-color .15s}
+  .tool:hover{background:var(--tile-h);border-color:#333}
+  .tool:hover .name::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
+        background:var(--red);margin-left:8px;vertical-align:middle}
+  .ico{width:32px;height:32px;border-radius:8px;background:#fff;display:grid;place-items:center;flex:none;overflow:hidden}
+  .ico img{width:20px;height:20px}
+  .ico span{color:#000;font-family:var(--display);font-weight:800;font-size:13px}
+  .name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  aside{position:sticky;top:24px}
+  .cal{background:#fff;border-radius:16px;overflow:hidden;height:calc(100vh - 220px);min-height:420px}
+  .cal iframe{border:0;width:100%;height:100%}
+  .cal-setup{background:var(--tile);border:1px solid var(--line);border-radius:16px;padding:24px}
+  .cal-setup p{color:var(--muted);margin-bottom:14px;line-height:1.5}
+  .cal-setup input{width:100%;background:#000;border:1px solid #333;color:#fff;font:inherit;padding:12px 14px;border-radius:10px;margin-bottom:10px}
+  .btn{background:var(--fg);color:#000;border:0;font:inherit;font-weight:500;padding:11px 16px;border-radius:10px;cursor:pointer}
+  .cal-tools{display:flex;justify-content:space-between;margin-top:10px;color:var(--muted);font-size:12px}
+  .cal-tools button{background:none;border:0;color:inherit;font:inherit;cursor:pointer;text-decoration:underline}
+
+  footer{margin-top:24px;color:#444;font-size:12px}
+  .annonce{margin:-20px 0 36px;padding:14px 20px;border-left:3px solid var(--red);background:var(--tile);
+           border-radius:0 12px 12px 0;line-height:1.5;white-space:pre-line}
+
+  @media (max-width:1000px){
+    body{padding:24px 16px}
+    main{grid-template-columns:1fr}
+    aside{position:static}
+    .cal{height:520px}
+    header{flex-direction:column;align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+  <svg class="logo" viewBox="870 430 290 290" aria-label="Black Lemon">
+    <defs><clipPath id="inner"><circle cx="1000" cy="588" r="75"/></clipPath></defs>
+    <circle cx="1000" cy="588" r="122" fill="#fff"/>
+    <circle cx="1000" cy="588" r="75" fill="#000"/>
+    <polygon points="1000,590 1110,700 890,700" fill="#fff" clip-path="url(#inner)"/>
+    <circle cx="1132" cy="456" r="18" fill="#FF0000"/>
+  </svg>
+  <div>
+    <div class="hello" id="hello">Bonjour<span class="dot"></span></div>
+    <div class="date" id="date"></div>
+  </div>
+  </div>
+  <div class="clock" id="clock"></div>
+</header>
+
+<form class="search" action="https://www.google.com/search" method="get">
+  <input name="q" placeholder="Rechercher sur Google…" autocomplete="off" autofocus>
+</form>
+
+<main>
+  <section id="tools"></section>
+  <aside>
+    <h2>Mon agenda</h2>
+    <div id="calendar"></div>
+  </aside>
+</main>
+
+<footer>Un lien manque ou ne marche plus ? Écris à Florian sur Slack.</footer>
+
+<script>
+/* ============================================================
+   CONFIGURATION — c'est la seule partie à modifier au quotidien.
+   url: "#" = lien à compléter.
+   ============================================================ */
+const DOMAINE = "blacklemon.net";
+
+// MESSAGE POUR TOUT LE MONDE — s'affiche en bandeau sous la recherche.
+// Laisser vide ("") pour ne rien afficher.
+const MESSAGE = "";
+
+const OUTILS = [
+  { groupe: "Courant", liens: [
+    { nom: "Gmail",        url: "https://mail.google.com/" },
+    { nom: "Slack",        url: "https://app.slack.com/" },
+    { nom: "Google Meet",  url: "https://meet.google.com/" },
+    { nom: "Agenda",       url: "https://calendar.google.com/" },
+  ]},
+  { groupe: "Projets & docs", liens: [
+    { nom: "Notion",       url: "https://www.notion.so/" },
+    { nom: "Google Drive", url: "https://drive.google.com/" },
+    { nom: "Furious",      url: "https://agenceblacklemon.furious-squad.com/" },
+  ]},
+  { groupe: "IA", liens: [
+    { nom: "Claude",       url: "https://claude.ai/" },
+    { nom: "ChatGPT",      url: "https://chatgpt.com/" },
+    { nom: "Magnific AI",  url: "https://magnific.ai/" },
+    { nom: "Gemini",       url: "https://gemini.google.com/" },
+  ]},
+  { groupe: "Création", liens: [
+    { nom: "Canva",        url: "https://www.canva.com/" },
+  ]},
+  { groupe: "Admin & RH", liens: [
+    { nom: "Qonto",        url: "https://app.qonto.com/" },
+    { nom: "MySilae",      url: "https://my.silae.fr/sign-in" },
+  ]},
+];
+
+/* ============ Rien à modifier en dessous ============ */
+const $ = s => document.querySelector(s);
+
+// Stockage local protégé (peut être indisponible en navigation privée)
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){} },
+  del(k){ try { localStorage.removeItem(k); } catch(e){} },
+};
+
+// En-tête : salutation, date, heure
+// Prénom = partie avant le "." de l'adresse (ex. jean-marc.dupont@ → Jean-Marc)
+function prenom(){
+  const email = store.get("bl_agenda_email");
+  if(!email) return "";
+  const brut = email.split("@")[0].split(".")[0];
+  return brut.replace(/[^a-zà-ÿ-]/gi, "")
+             .split("-").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join("-");
+}
+
+// Bandeau message
+if(MESSAGE.trim()){
+  const b = document.createElement("div");
+  b.className = "annonce";
+  b.textContent = MESSAGE;
+  document.querySelector("form.search").after(b);
+}
+
+function tick(){
+  const d = new Date();
+  const h = d.getHours();
+  const p = prenom();
+  $("#hello").innerHTML = (h < 18 ? "Bonjour" : "Bonsoir") + (p ? " " + p : "") + '<span class="dot"></span>';
+  $("#date").textContent = d.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+  $("#clock").textContent = d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+}
+tick(); setInterval(tick, 10000);
+
+// Tuiles des outils
+function domaineDe(url){ try { return new URL(url).hostname; } catch(e){ return ""; } }
+$("#tools").innerHTML = OUTILS.map(g => `
+  <div class="group">
+    <h2>${g.groupe}</h2>
+    <div class="grid">
+      ${g.liens.map(l => {
+        const host = domaineDe(l.url);
+        const ico = host
+          ? `<img src="https://www.google.com/s2/favicons?domain=${host}&sz=64" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'${l.nom[0]}'}))">`
+          : `<span>${l.nom[0]}</span>`;
+        return `<a class="tool" href="${l.url}"><div class="ico">${ico}</div><div class="name">${l.nom}</div></a>`;
+      }).join("")}
+    </div>
+  </div>`).join("");
+
+// Agenda : chaque personne renseigne son adresse une fois, elle est gardée dans son navigateur
+function afficherAgenda(){
+  const email = store.get("bl_agenda_email");
+  const box = $("#calendar");
+  if(!email){
+    box.innerHTML = `
+      <div class="cal-setup">
+        <p>Pour afficher ton agenda ici, indique ton adresse Black Lemon (à faire une seule fois).</p>
+        <form id="calForm">
+          <input id="calEmail" type="email" placeholder="prenom.nom@${DOMAINE}" required>
+          <button class="btn" type="submit">Afficher mon agenda</button>
+        </form>
+      </div>`;
+    $("#calForm").addEventListener("submit", e => {
+      e.preventDefault();
+      store.set("bl_agenda_email", $("#calEmail").value.trim().toLowerCase());
+      afficherAgenda(); tick();
+    });
+    return;
+  }
+  const params = new URLSearchParams({
+    src: email, ctz: "Europe/Paris", hl: "fr", wkst: "2",
+    mode: store.get("bl_agenda_mode") || "AGENDA",
+    showTitle: "0", showPrint: "0", showTabs: "0", showCalendars: "0", showTz: "0",
+  });
+  const mode = params.get("mode");
+  box.innerHTML = `
+    <div class="cal"><iframe src="https://calendar.google.com/calendar/embed?${params}" loading="lazy"></iframe></div>
+    <div class="cal-tools">
+      <button id="calMode">${mode === "AGENDA" ? "Vue semaine" : "Vue liste"}</button>
+      <button id="calReset">Changer d'adresse</button>
+    </div>`;
+  $("#calMode").onclick = () => { store.set("bl_agenda_mode", mode === "AGENDA" ? "WEEK" : "AGENDA"); afficherAgenda(); };
+  $("#calReset").onclick = () => { store.del("bl_agenda_email"); afficherAgenda(); tick(); };
+}
+afficherAgenda();
+</script>
+</body>
+</html>
