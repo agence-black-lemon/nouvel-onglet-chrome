@@ -146,6 +146,15 @@
   .cem-bar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#ffb3b3,var(--red));border-radius:4px}
   .cem-pm{font-size:11px;color:var(--muted)}
   .cem-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:10px}
+  .cem-classement{margin-top:18px;border-top:1px solid #222;padding-top:14px}
+  .cem-classement h4{font-family:var(--display);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:8px}
+  .cl-row{display:grid;grid-template-columns:30px 1fr 90px 90px;gap:8px;padding:6px 10px;border-radius:8px;font-size:14px;align-items:center}
+  .cl-row.moi{background:#1c1c1c}
+  .cl-row .r{color:#666}
+  .cl-row.top1 .r{color:var(--red);font-weight:700}
+  .cl-row .m,.cl-row .e{text-align:right;color:var(--muted);font-size:12px}
+  .cl-row .m b{color:var(--fg);font-size:14px}
+  .cl-vide{color:var(--muted);font-size:13px;padding:4px 10px}
   .cem-link{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:12px}
   .annonce{margin:-20px 0 36px;padding:14px 20px;border-left:3px solid var(--red);background:var(--tile);
            border-radius:0 12px 12px 0;line-height:1.5;white-space:pre-line}
@@ -240,6 +249,10 @@
   <div class="cem-head"><span>#</span><span>Mot</span><span>°C</span><span></span><span>Progression</span></div>
   <div class="cem-last" id="cemLast"></div>
   <div class="cem-list" id="cemList"></div>
+  <div class="cem-classement" id="cemClassement" hidden>
+    <h4 id="cemClTitre">Classement du mois</h4>
+    <div id="cemClListe"></div>
+  </div>
   <div class="cem-foot">
     <button type="button" class="cem-link" id="cemGiveUp">Je donne ma langue au chat</button>
     <button type="button" class="btn" id="cemShare" hidden>Copier mon résultat pour Slack</button>
@@ -613,7 +626,36 @@ $("#ticketForm").addEventListener("submit", e => {
     etat.essais.push(i);
     if(rangDe.get(i) === 1000) etat.fini = true;
     sauver(); dessiner(i);
+    if(etat.fini) envoyerScore();
   });
+  // ----- Classement du mois (via le même script Google que le sondage) -----
+  const MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  function afficherClassement(d){
+    if(!d || !d.classement) return;
+    const box = $("#cemClassement"); box.hidden = false;
+    const m = MOIS[auj.getMonth()]; $("#cemClTitre").textContent = "Classement " + (/^[aeiouy]/.test(m) ? "d'" : "de ") + m;
+    const p = (prenom() || store.get("bl_dej_prenom") || "").toLowerCase();
+    const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+    $("#cemClListe").innerHTML = d.classement.length
+      ? d.classement.map((l, k) => `<div class="cl-row${k === 0 ? " top1" : ""}${l.prenom.toLowerCase() === p ? " moi" : ""}">
+          <span class="r">${k + 1}</span><span>${esc(l.prenom)}</span>
+          <span class="m"><b>${l.mots}</b> mot${l.mots > 1 ? "s" : ""}</span><span class="e">${l.moyenne} essais moy.</span></div>`).join("")
+      : `<div class="cl-vide">Personne n'a encore trouvé de mot ce mois-ci. À toi de jouer !</div>`;
+  }
+  async function chargerClassement(){
+    if(!DEJ_API) return;
+    try { afficherClassement(await (await fetch(DEJ_API + "?action=cem")).json()); } catch(e){}
+  }
+  async function envoyerScore(){
+    if(!DEJ_API || etat.abandon || etat.envoye) return;
+    let p = prenom() || store.get("bl_dej_prenom") || "";
+    if(!p){ p = (prompt("Bravo ! Ton prénom pour le classement ?") || "").trim(); if(!p) return; store.set("bl_dej_prenom", p); }
+    try {
+      const r = await fetch(DEJ_API, { method: "POST", body: JSON.stringify({ action: "cem_score", prenom: p, num, essais: etat.essais.length }) });
+      etat.envoye = true; sauver(); afficherClassement(await r.json());
+    } catch(e){}
+  }
+
   $("#cemGiveUp").onclick = () => {
     if(!scores || !confirm("Sûr ? Le mot va s'afficher.")) return;
     etat.fini = true; etat.abandon = true; sauver(); dessiner();
@@ -628,7 +670,8 @@ $("#ticketForm").addEventListener("submit", e => {
   };
   $("#cemOpen").onclick = async () => {
     dlgC.showModal();
-    if(await charger()) { dessiner(); $("#cemInput").focus(); }
+    chargerClassement();
+    if(await charger()) { dessiner(); $("#cemInput").focus(); if(etat.fini) envoyerScore(); }
   };
   $("#cemClose").onclick = () => dlgC.close();
   if(etat.fini) $("#cemSub").textContent = etat.abandon ? "Abandonné… revanche demain" : `Trouvé en ${etat.essais.length} essais — reviens demain`;
