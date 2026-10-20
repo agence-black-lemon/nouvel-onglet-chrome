@@ -156,6 +156,8 @@
   .cl-vide{color:var(--muted);font-size:13px;padding:4px 10px}
   .cem-link{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:12px}
   /* Recos musicales du jour */
+  .reco-play{width:100%;font:inherit;color:var(--fg);cursor:pointer;text-align:left}
+  .reco-play:hover{border-color:var(--red)}
   .reco-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));align-items:start}
   .reco-item .reco-meta{margin-top:6px}
   .reco-form{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
@@ -297,7 +299,8 @@
   </div>
   <p class="cem-rules">Trouve le mot secret. Plus ton mot est proche par le <b>sens</b>, plus il est chaud.
     Chaque mot reçoit un <b>score sur 100</b> (100 = trouvé). Dans les 1000 mots les plus proches, ton <b>rang</b> s'affiche (n°1 = le plus proche).
-    Pluriels et verbes conjugués sont acceptés : « citrons » compte comme « citron ».</p>
+    Pluriels et verbes conjugués sont acceptés : « citrons » compte comme « citron ».
+    <br><span style="color:#555">Base de mots : modèle frWac de <a href="https://fauconnier.github.io/" target="_blank" rel="noopener" style="text-decoration:underline">J.-P. Fauconnier</a> (CC-BY 3.0) et Lexique 3.83.</span></p>
   <form id="cemForm" class="cem-form">
     <input id="cemInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Tape un mot…">
     <button class="btn" type="submit">Envoyer</button>
@@ -604,6 +607,13 @@ async function api(params, corps){
   if(d && d.erreur) throw new Error(d.erreur);
   return d;
 }
+// Un seul appel au script Google à l'ouverture de l'onglet (déjeuner + recos + brocante),
+// avec affichage immédiat de la dernière réponse connue en attendant.
+const CACHE = (() => { try { return JSON.parse(store.get("bl_init") || "null"); } catch(e){ return null; } })();
+const INIT = DEJ_API
+  ? api({ action: "init", prenom: monPrenom() }).then(d => { store.set("bl_init", JSON.stringify(d)); return d; })
+  : Promise.reject(new Error("pas d'API"));
+INIT.catch(() => {});
 
 // Lecteur intégré à partir d'un lien Spotify, YouTube, Deezer ou Apple Music
 function lecteur(lien, grand){
@@ -627,6 +637,13 @@ function lecteur(lien, grand){
     : `<a class="tool" href="${esc(u.href)}" target="_blank" rel="noopener"><div class="ico"><span>♪</span></div><div class="name">Écouter la reco</div></a>`;
 }
 
+// Aperçu léger d'une reco : le lecteur (lourd) ne se charge qu'au clic
+function facade(lien, k){
+  let h = ""; try { h = new URL(String(lien)).hostname.replace(/^www\./, ""); } catch(e){ return ""; }
+  const src = /spotify/.test(h) ? "Spotify" : /youtu/.test(h) ? "YouTube" : /deezer/.test(h) ? "Deezer" : /apple/.test(h) ? "Apple Music" : h;
+  return `<button type="button" class="tool reco-play" data-lien="${esc(lien)}"><div class="ico"><span>▶</span></div><div class="name">Écouter sur ${esc(src)}</div></button>`;
+}
+
 // Recos musicales : 3 recos de l'équipe par jour (proposées la semaine d'avant) + formulaire
 (function(){
   const box = $("#reco");
@@ -635,7 +652,7 @@ function lecteur(lien, grand){
   function dessiner(){
     const jour = d && d.jour && d.jour.length ? d.jour : secours;
     const titre = d && d.jour && d.jour.length ? "Les recos musicales du jour" : "La reco musicale";
-    const lecteurs = jour.map(x => `<div class="reco-item">${lecteur(x.lien, false)}
+    const lecteurs = jour.map((x, k) => `<div class="reco-item">${facade(x.lien, k)}
       ${(x.prenom || x.mot) ? `<div class="reco-meta">${x.prenom ? `La reco de <strong>${esc(x.prenom)}</strong>` : ""}${x.prenom && x.mot ? " — " : ""}${esc(x.mot || "")}</div>` : ""}</div>`).join("");
     const form = DEJ_API ? `
       <form class="reco-form" id="recoForm">
@@ -647,6 +664,7 @@ function lecteur(lien, grand){
     if(!lecteurs && !form) return;
     box.innerHTML = `<h2>${titre}</h2><div class="reco-grid">${lecteurs}</div>${form}`;
     box.hidden = false;
+    box.querySelectorAll(".reco-play").forEach(b => b.onclick = () => { b.outerHTML = lecteur(b.dataset.lien, false).replace('loading="lazy"', 'loading="eager"').replace(/(embed\/[^"?]+)(\?)?/, (m, a, q) => a + (q ? "?autoplay=1&" : "?autoplay=1")); });
     const f = $("#recoForm");
     if(f) f.onsubmit = envoyer;
   }
@@ -657,7 +675,8 @@ function lecteur(lien, grand){
   }
   async function charger(){
     if(!DEJ_API){ dessiner(); return; }
-    try { d = await api({ action: "reco", prenom: monPrenom() }); } catch(e){ d = null; }
+    if(CACHE && CACHE.reco){ d = CACHE.reco; dessiner(); }
+    try { d = (await INIT).reco; } catch(e){ try { d = await api({ action: "reco", prenom: monPrenom() }); } catch(e2){} }
     dessiner();
   }
   async function envoyer(e){
@@ -721,13 +740,15 @@ function lecteur(lien, grand){
     }).join("") : `<div class="broc-vide">Rien à donner pour l'instant. Reviens bientôt !</div>`;
     $("#brocListe").querySelectorAll("button[data-act]").forEach(b => b.onclick = () => action(b.dataset.act, b.dataset.id));
     $("#brocListe").querySelectorAll(".broc-photo img").forEach(i => i.onclick = () => zoom(i.src));
-    chargerPhotos();
+    if(dlgB.open) chargerPhotos();   // photos chargées seulement quand la fenêtre est ouverte
   }
   async function chargerPhotos(){
     for(const el of $("#brocListe").querySelectorAll(".broc-photo[data-photo]")){
       const id = el.dataset.photo;
-      if(!id || photos[id]) continue;
-      try { photos[id] = (await api({ action: "img", id })).data; el.innerHTML = `<img src="${photos[id]}" alt="">`; el.querySelector("img").onclick = () => zoom(photos[id]); }
+      if(!id) continue;
+      if(!photos[id]) photos[id] = store.get("bl_img_" + id);
+      if(photos[id]){ el.innerHTML = `<img src="${photos[id]}" alt="">`; el.querySelector("img").onclick = () => zoom(photos[id]); continue; }
+      try { photos[id] = (await api({ action: "img", id })).data; store.set("bl_img_" + id, photos[id]); el.innerHTML = `<img src="${photos[id]}" alt="">`; el.querySelector("img").onclick = () => zoom(photos[id]); }
       catch(e){ el.textContent = "Photo indisponible"; }
     }
   }
@@ -740,8 +761,9 @@ function lecteur(lien, grand){
     if(d.maintenant) decalage = new Date(d.maintenant) - Date.now();
     dessiner();
   }
-  async function charger(){
-    try { recevoir(await api({ action: "broc" })); $("#brocMsg").textContent = ""; }
+  async function charger(premier){
+    if(premier && CACHE && CACHE.broc) recevoir(CACHE.broc);
+    try { recevoir(premier ? await INIT.then(d => d.broc).catch(() => api({ action: "broc" })) : await api({ action: "broc" })); $("#brocMsg").textContent = ""; }
     catch(e){ $("#brocSub").textContent = "Indisponible pour le moment"; $("#brocMsg").textContent = "Impossible de charger les objets : " + e.message; }
   }
   async function action(act, id){
@@ -799,7 +821,7 @@ function lecteur(lien, grand){
   $("#baQuitter").onclick = () => { store.del("bl_broc_code"); $("#brocAjout").hidden = true; $("#brocAdmin").hidden = false; dessiner(); };
   $("#brocAdmin").onclick = modeAdmin;
   $("#brocOpen").onclick = () => {
-    dlgB.showModal(); charger();
+    dlgB.showModal(); dessiner(); charger();
     clearInterval(minuteur);
     minuteur = setInterval(() => {
       let aRecharger = false;
@@ -812,8 +834,8 @@ function lecteur(lien, grand){
   };
   $("#brocClose").onclick = () => dlgB.close();
   dlgB.addEventListener("close", () => clearInterval(minuteur));
-  charger();
-  setInterval(() => { if(!document.hidden && !dlgB.open) charger(); }, 5 * 60000);
+  charger(true);
+  setInterval(() => { if(!document.hidden && !dlgB.open) charger(); }, 15 * 60000);
 })();
 
 // Recopie d'écran Apple TV : mode d'emploi
@@ -1023,8 +1045,13 @@ $("#ticketForm").addEventListener("submit", e => {
       envoyer(deja ? { action: "leave" } : { action: "join", lieu: b.dataset.lieu });
     });
   }
-  async function charger(){
-    try { const r = await fetch(DEJ_API); donnees = await r.json(); dessiner(); $("#dejMsg").textContent = ""; }
+  let dernier = 0;
+  async function charger(premier){
+    if(!premier && Date.now() - dernier < 55000) return;   // évite les rafales quand on change d'onglet
+    dernier = Date.now();
+    if(premier && CACHE && CACHE.dej && CACHE.dej.date === new Date().toLocaleDateString("sv-SE")){ donnees = CACHE.dej; dessiner(); }
+    try { const lire = async () => (await fetch(DEJ_API)).json();
+      donnees = premier ? await INIT.then(d => d.dej).catch(lire) : await lire(); dessiner(); $("#dejMsg").textContent = ""; }
     catch(e){ $("#dejMsg").textContent = "Impossible de charger le sondage pour le moment."; }
   }
   async function envoyer(action){
@@ -1047,7 +1074,7 @@ $("#ticketForm").addEventListener("submit", e => {
     $("#dejLieu").value = "";
     envoyer({ action: "join", lieu });
   });
-  dessiner(); charger();
+  dessiner(); charger(true);
   setInterval(() => { if(!document.hidden) charger(); }, 60000);
   document.addEventListener("visibilitychange", () => { if(!document.hidden) charger(); });
 })();
