@@ -67,12 +67,17 @@
   .name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
   aside{position:sticky;top:24px}
+  aside:has(.reco:not([hidden])) .cal{height:calc(100vh - 460px)}
   .cal{background:#fff;border-radius:16px;overflow:hidden;height:calc(100vh - 220px);min-height:420px}
   .cal iframe{border:0;width:100%;height:100%}
   .cal-setup{background:var(--tile);border:1px solid var(--line);border-radius:16px;padding:24px}
   .cal-setup p{color:var(--muted);margin-bottom:14px;line-height:1.5}
   .cal-setup input{width:100%;background:#000;border:1px solid #333;color:#fff;font:inherit;padding:12px 14px;border-radius:10px;margin-bottom:10px}
   .btn{background:var(--fg);color:#000;border:0;font:inherit;font-weight:500;padding:11px 16px;border-radius:10px;cursor:pointer}
+  .reco{margin-top:28px}
+  .reco iframe{display:block;width:100%;border:0;border-radius:12px;background:#111}
+  .reco .reco-meta{color:var(--muted);font-size:13px;margin-top:10px;line-height:1.5}
+  .reco .reco-meta strong{color:var(--fg);font-weight:500}
   .cal-tools{display:flex;justify-content:space-between;margin-top:10px;color:var(--muted);font-size:12px}
   .cal-tools button{background:none;border:0;color:inherit;font:inherit;cursor:pointer;text-decoration:underline}
 
@@ -149,6 +154,7 @@
   <aside>
     <h2>Mon agenda</h2>
     <div id="calendar"></div>
+    <div id="reco" class="reco" hidden></div>
   </aside>
 </main>
 
@@ -207,6 +213,15 @@ const SUPPORT_EMAIL = "support-blacklemon@d-ns.fr";
 // Laisser vide ("") pour ne rien afficher.
 const MESSAGE = "";
 
+// RECO MUSICALE DE LA SEMAINE — colle un lien Spotify, YouTube, Deezer ou Apple Music.
+// Laisser lien vide ("") pour masquer le bloc.
+const RECO = {
+  lien: "https://open.spotify.com/track/47ur3v3BkQwfTvvK4UOoV4",
+  par:  "Flo",   // qui recommande (ex. "Paloma")
+  mot:  "",   // un petit mot (facultatif)
+  grand: true, // true = grand lecteur avec la pochette, false = lecteur compact
+};
+
 // Applications du menu "9 points" (en haut à droite)
 const GOOGLE_APPS = [
   { nom: "Compte",      url: "https://myaccount.google.com/" },
@@ -218,8 +233,8 @@ const GOOGLE_APPS = [
   { nom: "Docs",        url: "https://docs.google.com/document/" },
   { nom: "Sheets",      url: "https://docs.google.com/spreadsheets/" },
   { nom: "Slides",      url: "https://docs.google.com/presentation/" },
-  { nom: "Forms",       url: "https://docs.google.com/forms/" },
-  { nom: "Contacts",    url: "https://contacts.google.com/" },
+  { nom: "Forms",       url: "https://docs.google.com/forms/", icone: "data:image/png;base64,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" },
+  { nom: "Contacts",    url: "https://contacts.google.com/", icone: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAKd0lEQVR42uWba2xc1RHHf3PuvfuwN7YT50HqkERuEA1Q3iVpC8RUCOiHRlXomtKISlBK1U8gRHCFqq6XCiqaqlKlqlKh9KUmJLtCQqCK0hdJQZSIUB5NTNWSFIVHQpwEO05s795zz/TDXTt2/IiT7CZ2OdJ+2nvPnPnPnJn/zDlXqPXIqkdRIgDWvrESx82oXgvRMpRGAIReMLsQsxXDk2y45OUx79ZoSO2m1srcotyy/RpM8ACq1+MnfZwFF4K6yiMGTADGB1uyiPwZFz7M5itfGDXPzAFAJV5wzvDVLz+CCe7D+BAeATRCRRBkhHxFUUQVxCPIUAHpR2x6qgPy7tic0x4AFXII254NaFxYINW4moFDbli5qc0Rg5SeYxjseYbefVlWfDEkj1YbBFN1QLMY8uJomLeRZMNqBg6ECGbqygOIh2AYOBCSbPoSDfM2khdHFlNto1UXgGzBUJSI7LYOUs1rGDwYIiY4dThNwOCBkFTzGrLbOuK5C2Z6boGcGvIot7zaing7AR+1BuQ0ZagivgMsGl3I5it2k0PIi5teHtBFHKRUOwgySdTq6SsPIIJajefUDhCNZU0rD6hE6OxLczDBLsRvRC3VAWDYC0BtLy78JMXPHapWVqiOB2Qr80jiWoJME2pd9ZQf9gJHkGlCEteOkjktANi/ZUjZFYivtSEtovHcrDhO5jQAYH6bVtbYirrasUt1gmjrKJnTIwgWh0LBLNARNLja7FIrMkbInGZEKKT2o6oyqhQD5lUsrvsQQ+1igIlljJI5nTzAyJs1t3+VZVQHgLa2mJU5t5XwqAO8GqjuxXN7W0bJnBYA5MVBzlD4zE5cuB2/DqCajYwIvw5cuJ1Nl3ZBzkw/KryqzYAoxl+P8QW0inFAFeMLxl8PorGs6dgPGCqI2rc/T6JhFeXDFhH/NHW3JBp8yoe3UrjyumoWQrVIg/Hw9Q7sYA9e0gc9ja2gEV7Sxw724OsdNYmpVZ0tL45s0bDxqt24gTWIDOClPFTtKVneS3mIDOAG1rDxqt1ki6aa1q9RS4xj3dybX76GRN0T+OkWSj2KSATqTVwoqYJEqHokmwQ78D7l/lt5cuULteoQ1463Dy149YufIDPrhyBr8VJg+8GFCrhjhEkFMJhA8OsgGgR0A0f67ufpqz+oZXu8hm1xIFvwKLbHC7/11c9C4k40uhExLfhJRjaFsSVQ9z7IHxH7GE9c8fcxc8w4AIasOzJyZ3dk8LkAFy1DornxI94BRHfRf6SLp6/uG5VRanQecOZHTg1Z9aa0dXJqztSy5MwjoUK2aMYUM/O7lWLW/f9YfIYMqbZ1c4qwJeYXXd1ocSdKvrOyDQA6K7/xRuW//Mit0xm/Ns7YUuExbeDyZzNe5FRNLqf+RAgHlfJQpmgRcxLPj0466p1sN+q0PCBbUK+QxYnEyOcKmsCVL2pIJi7LJLmg+7Bb/K+9vU1vffBRYs+hfnr6S4ROT1DuC/XJJHMzdbQ0NrGwqYm6pKFkIYocxpg4bwqDIuw1hjcFXtxwj7wybJCcmvwUGeMpAaCq0l7EFNtjcrL+KV0RWdY6526qT5rzBoFtu0q88t9u9vYcxUZRLEpOSgjGGJrSaVrnNbNsQYZ0ACUb88ihHxJTCIR/oDxqe/hVMS/lbEG9ofVVFYBCQb32ysQ/KOgXjEcHcEMiCb7Ctrc/4pnX9tje3gHwPfBFBOGUN6dzYCPq6tNctuRcWufOoWyHV68VHuV5CcQLwJZ5PQq5u7BO/jYVEE4KgFxO/Xxe7EMbdYGXZL3ncZsxMNiPJn2iZ15/z2zt+sDgGYxvUNXT7goIxOcizoFzLF/UwuVLWrCRjlq+gkNxQRJfFReVuXvzOvnpqpz6W/NiTxuA3PPq568T+/0Nen0yzS+DJOcO9OGcOk0njFfcvoeX39qLSQXxbYcqx+NhIMohy1oWsrJ1MWWryPF1lRJhkEQaM9jH/cUOWT8ZCHIyyj/0hH4jkeJRVYwtYx3q1yeF53Z+yB+2v4OXCoi0tpnIiODKIZe0LuXiRQsohWNBUEWNIfJT+OWjfKVwvzw50XYwJ2H5b6cz/MKGEJZxCn4qEHbv7+e5N97FJP2aKw/gVJHA580977L/cD+BJ+hxckUQp5goxInPY2t/rAuLWVxuHIptThTw8teJffB3uqZuFj8rDRI5h4hgqLj57//5HhpV+Sz0hPshjgmv7Xlvsi1johCXSDHbRjyIiHZdONbjzWTkpr1dogcLen4yzW9tGacRIoKoKqlA+M+HR9i9rxdJ+Dg9cyRMVRHfZ39vL3t7jxD4Y72ggpNXHsRhuO1r63VJsV2i473ATERpu4pItqCep/zaD6i3IRrf9YlP/4yB1/YchMidjYpqOEW+c/AgRiZxBIdLpEla4ZaR9HlSAHI5vGK7RJdG3FU/i5WD/Vgxxw47PBGOlpRd3X3gGZSzQMFVwRj2H+4bNxCOyAqiESrKTUN1w6j+7XgsTyDKLdMG8fheaQAVOQaUKvg+HDxcpqe/HANwNvQndsOj5TJHy2Ua00msGzetmcgiCMvv+rnW5b8l/SNvl4zxgM4teIhoMsnX6+o5JwqJRj+neAKHB0Kcjc5o7Bsvh2sUMVAO43WMZwkZvpA6p/cQ8yseLhN6QGcbETk1zvHNMESP5woaBxfKUVQxgwzZ4ywgEF8ZsC6aLA5JBZcEKdKTZoFsQT0R0WA5lwYBny4PAjLZQed0aN5MfQ3OniANXjCvwjgNNyRTiFT3gHNajlEAdHVX4HR83jlQkI8RACrFdokKBfVEON/GdffHB4ChALonZLYq810UX0/82ADQ2RkrO2BoBDJ6hun92errjuEBASRE8CoeMb0h0DhKecZMniZiLWzgMXhCACJv5ri9AmIM6SDADRGUcR6q4PNRKqQbIN95LHeambp3peIB6USCukQC5yZwV8EZHxTe/mWH9KEqiMx8ABAB55ibqScVmMnKcTUeoPwVYFXnaGI3cwGojCXNzSdyFROWcMCm8apBMzONL2gU0ZjJ0DK7gTBionLYBimMC3m2sE52ZLPqHX9gMnM9QJWLF7Xgm/G7QWj8cV4UYhG+M9GR2YwDwFRa463nLGBJc+P4rfE4+NtEPZ4N+W5hnezIFjDF4il0haeb8i4MmT9nNlctXYyNxj0XUFXC9CyC0hF+U1wnj6zKqT/RCdEYAPwpVoCjP/ys/Z4HcOWQhXPmsOr8ZYgIx3UjVRUrBkllCEr9PL75Pm7P5dRszU+s0zAAMTlQ6U/xLrDXD0Dd2BcFwUYwvyGF8Q04rQlllhGKa2hBleWLW2j71Hn4xhA5pXIf16nixCDJenzxOFoa4J5N98qd5JAT3RswI2DWQgGTXy39zvGAH4CfGNsMibtByoKGBG3LF6JlO/wNdDUDnDqHWosnwrnzmrnxouVcuXQRTiFSECMYDwkSmEQKA/TYEo+7fi7ffK/8JDfFS1ZjbDd0tv7wJr3dT/CAi1jq3Pj3FQIP/vLWPl7694f0lW1V+kNGhITv0ZBKsaBhFotmz6Y5k0YVwmN7XoEyQrcx7AD+JMpTG++V3UOdrakcjQP8D2tCtzU35W07AAAAAElFTkSuQmCC" },
   { nom: "Keep",        url: "https://keep.google.com/" },
   { nom: "Maps",        url: "https://maps.google.com/" },
   { nom: "YouTube",     url: "https://www.youtube.com/" },
@@ -297,7 +312,7 @@ tick(); setInterval(tick, 10000);
   const favicon = u => "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&size=64&url=" + encodeURIComponent(u);
   panel.innerHTML = GOOGLE_APPS.map(a => `
     <a class="gapp" href="${a.url}">
-      <div class="gi"><img src="${favicon(a.url)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'${a.nom[0]}'}))"></div>
+      <div class="gi"><img src="${a.icone || favicon(a.url)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'${a.nom[0]}'}))"></div>
       <div>${a.nom}</div>
     </a>`).join("");
   const toggle = open => { panel.hidden = !open; btn.setAttribute("aria-expanded", open); };
@@ -360,6 +375,36 @@ function afficherAgenda(){
   $("#calReset").onclick = () => { store.del("bl_agenda_email"); afficherAgenda(); tick(); };
 }
 afficherAgenda();
+
+// Reco musicale : transforme le lien collé en lecteur intégré
+(function(){
+  const lien = (RECO.lien || "").trim();
+  if(!lien) return;
+  let u; try { u = new URL(lien); } catch(e){ return; }
+  const h = u.hostname.replace(/^www\./, "");
+  let src = "", haut = 152;
+  if(h === "open.spotify.com"){
+    const m = u.pathname.match(/(track|album|playlist|episode|artist)\/([A-Za-z0-9]+)/);
+    if(m){ src = `https://open.spotify.com/embed/${m[1]}/${m[2]}?theme=0`; haut = (m[1] === "track" && !RECO.grand) ? 152 : 352; }
+  } else if(h === "youtube.com" || h === "youtu.be" || h === "music.youtube.com"){
+    const id = h === "youtu.be" ? u.pathname.slice(1) : u.searchParams.get("v");
+    if(id){ src = `https://www.youtube-nocookie.com/embed/${id}`; haut = 200; }
+  } else if(h.endsWith("deezer.com")){
+    const m = u.pathname.match(/(track|album|playlist)\/(\d+)/);
+    if(m){ src = `https://widget.deezer.com/widget/dark/${m[1]}/${m[2]}`; haut = m[1] === "track" ? 150 : 300; }
+  } else if(h === "music.apple.com"){
+    src = "https://embed.music.apple.com" + u.pathname + u.search; haut = u.searchParams.get("i") ? 175 : 300;
+  }
+  const box = $("#reco");
+  const meta = (RECO.par || RECO.mot)
+    ? `<div class="reco-meta">${RECO.par ? `La reco de <strong>${RECO.par}</strong>` : ""}${RECO.par && RECO.mot ? " — " : ""}${RECO.mot || ""}</div>` : "";
+  box.innerHTML = `<h2>La reco musicale de la semaine</h2>` + (src
+    ? `<iframe src="${src}" height="${haut}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`
+    : `<a class="tool" href="${lien}" target="_blank"><div class="ico"><span>♪</span></div><div class="name">Écouter la reco</div></a>`) + meta;
+  box.hidden = false;
+  document.querySelector(".cal")?.style.setProperty("height", "calc(100vh - 460px)");
+  document.documentElement.style.setProperty("--reco", "1");
+})();
 
 // Ticket support : ouvre un brouillon Gmail pré-rempli
 const dlg = $("#ticket");
