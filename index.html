@@ -640,8 +640,9 @@ function lecteur(lien, grand){
 // Aperçu léger d'une reco : le lecteur (lourd) ne se charge qu'au clic
 function facade(lien, k){
   let h = ""; try { h = new URL(String(lien)).hostname.replace(/^www\./, ""); } catch(e){ return ""; }
-  const src = /spotify/.test(h) ? "Spotify" : /youtu/.test(h) ? "YouTube" : /deezer/.test(h) ? "Deezer" : /apple/.test(h) ? "Apple Music" : h;
-  return `<button type="button" class="tool reco-play" data-lien="${esc(lien)}"><div class="ico"><span>▶</span></div><div class="name">Écouter sur ${esc(src)}</div></button>`;
+  if(h === "open.spotify.com") return lecteur(lien, false);   // Spotify : lecteur intégré directement
+  const src = /youtu/.test(h) ? "YouTube" : /deezer/.test(h) ? "Deezer" : /apple/.test(h) ? "Apple Music" : h;
+  return `<a class="tool" href="${esc(lien)}" target="_blank" rel="noopener"><div class="ico"><span>▶</span></div><div class="name">Écouter sur ${esc(src)}</div></a>`;
 }
 
 // Recos musicales : 3 recos de l'équipe par jour (proposées la semaine d'avant) + formulaire
@@ -656,7 +657,7 @@ function facade(lien, k){
       ${(x.prenom || x.mot) ? `<div class="reco-meta">${x.prenom ? `La reco de <strong>${esc(x.prenom)}</strong>` : ""}${x.prenom && x.mot ? " — " : ""}${esc(x.mot || "")}</div>` : ""}</div>`).join("");
     const form = DEJ_API ? `
       <form class="reco-form" id="recoForm">
-        <input id="recoLien" type="url" required placeholder="Ta reco de la semaine : lien Spotify, YouTube, Deezer…">
+        <input id="recoLien" type="url" required placeholder="Ta reco de la semaine : lien Spotify (de préférence)">
         <input id="recoMot" maxlength="120" placeholder="Un petit mot (facultatif)">
         <button class="btn" type="submit">${d && d.maReco ? "Changer" : "Proposer"}</button>
       </form>
@@ -742,16 +743,34 @@ function facade(lien, k){
     $("#brocListe").querySelectorAll(".broc-photo img").forEach(i => i.onclick = () => zoom(i.src));
     if(dlgB.open) chargerPhotos();   // photos chargées seulement quand la fenêtre est ouverte
   }
-  async function chargerPhotos(){
-    for(const el of $("#brocListe").querySelectorAll(".broc-photo[data-photo]")){
-      const id = el.dataset.photo;
-      if(!id) continue;
-      if(!photos[id]) photos[id] = store.get("bl_img_" + id);
-      if(photos[id]){ el.innerHTML = `<img src="${photos[id]}" alt="">`; el.querySelector("img").onclick = () => zoom(photos[id]); continue; }
-      try { photos[id] = (await api({ action: "img", id })).data; store.set("bl_img_" + id, photos[id]); el.innerHTML = `<img src="${photos[id]}" alt="">`; el.querySelector("img").onclick = () => zoom(photos[id]); }
-      catch(e){ el.textContent = "Photo indisponible"; }
-    }
+  // Photos : toutes demandées en un seul appel, gardées dans le navigateur (un seul téléchargement par photo)
+  let enCours = null;
+  function afficherPhotos(){
+    $("#brocListe").querySelectorAll(".broc-photo[data-photo]").forEach(el => {
+      const id = el.dataset.photo, src = id && photos[id];
+      if(src && !el.querySelector("img")){ el.innerHTML = `<img src="${src}" alt="">`; el.querySelector("img").onclick = () => zoom(src); }
+      else if(id && photos[id] === null) el.textContent = "Photo indisponible";
+    });
   }
+  function chargerPhotos(){
+    const ids = objets.filter(o => o.photo).map(o => o.id);
+    ids.forEach(id => { if(!photos[id]) photos[id] = store.get("bl_img_" + id) || undefined; });
+    afficherPhotos();
+    const manquantes = ids.filter(id => photos[id] === undefined);
+    if(!manquantes.length || enCours) return enCours;
+    enCours = api({ action: "imgs", ids: manquantes.join(",") }).then(d => {
+      manquantes.forEach(id => {
+        const src = (d.images || {})[id];
+        photos[id] = src || null;
+        if(src) store.set("bl_img_" + id, src);
+      });
+    }).catch(() => { manquantes.forEach(id => { photos[id] = null; }); })
+      .finally(() => { enCours = null; afficherPhotos(); });
+    // ménage : on oublie les photos des objets qui ne sont plus affichés
+    try { Object.keys(localStorage).filter(k => k.startsWith("bl_img_") && !ids.includes(k.slice(7))).forEach(k => store.del(k)); } catch(e){}
+    return enCours;
+  }
+
   function zoom(src){
     const z = document.createElement("div"); z.className = "broc-zoom"; z.innerHTML = `<img src="${src}" alt="">`;
     z.onclick = () => z.remove(); dlgB.appendChild(z);
@@ -793,15 +812,15 @@ function facade(lien, k){
     const d = new Date(Date.now() + 3 * 864e5); d.setHours(17, 0, 0, 0);
     $("#baFin").value = new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 16);
   }
-  // Réduit la photo avant envoi (1280 px max, JPEG)
+  // Réduit la photo avant envoi (900 px max, JPEG)
   function reduire(fichier){
     return new Promise((ok, ko) => {
       const img = new Image(), url = URL.createObjectURL(fichier);
       img.onload = () => {
-        const k = Math.min(1, 1280 / Math.max(img.width, img.height));
+        const k = Math.min(1, 900 / Math.max(img.width, img.height));
         const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
         c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
-        ok(c.toDataURL("image/jpeg", 0.82));
+        ok(c.toDataURL("image/jpeg", 0.78));
       };
       img.onerror = () => ko(new Error("Image illisible (format HEIC ? exporte-la en JPEG)"));
       img.src = url;
@@ -834,7 +853,7 @@ function facade(lien, k){
   };
   $("#brocClose").onclick = () => dlgB.close();
   dlgB.addEventListener("close", () => clearInterval(minuteur));
-  charger(true);
+  charger(true).then(() => setTimeout(chargerPhotos, 4000));   // photos préchargées en arrière-plan, une seule fois par navigateur
   setInterval(() => { if(!document.hidden && !dlgB.open) charger(); }, 15 * 60000);
 })();
 
