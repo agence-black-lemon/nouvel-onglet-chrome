@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Agence Black Lemon</title>
+<title>agence black lemon</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='838 416 270 270'%3E%3Cstyle%3E.m%7Bfill:%23000%7D%40media %28prefers-color-scheme:dark%29%7B.m%7Bfill:%23fff%7D%7D%3C/style%3E%3Cpath fill='%23FF0000' d='M 1104.460938 437.941406 C 1104.460938 447.398438 1096.796875 455.066406 1087.339844 455.066406 C 1077.878906 455.066406 1070.214844 447.398438 1070.214844 437.941406 C 1070.214844 428.484375 1077.878906 420.816406 1087.339844 420.816406 C 1096.796875 420.816406 1104.460938 428.484375 1104.460938 437.941406 '/%3E%3Cpath class='m' d='M 1011.652344 616.539062 C 1011.644531 616.550781 1011.632812 616.5625 1011.621094 616.570312 L 960.160156 565.109375 L 908.730469 616.539062 C 880.308594 588.117188 880.308594 542.039062 908.730469 513.617188 C 937.152344 485.195312 983.230469 485.195312 1011.652344 513.617188 C 1040.078125 542.039062 1040.078125 588.117188 1011.652344 616.539062 M 960.191406 447.347656 C 895.171875 447.347656 842.460938 500.058594 842.460938 565.078125 C 842.460938 630.097656 895.171875 682.808594 960.191406 682.808594 C 1025.210938 682.808594 1077.921875 630.097656 1077.921875 565.078125 C 1077.921875 500.058594 1025.210938 447.347656 960.191406 447.347656 '/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -95,12 +95,57 @@
   .t-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
   .t-head h3{font-family:var(--display);font-stretch:125%;font-weight:800;text-transform:uppercase;font-size:18px}
   .t-close{background:none;border:0;color:var(--muted);font-size:26px;cursor:pointer;line-height:1}
+  .t-close:focus:not(:focus-visible){outline:none}
   #ticketForm label{display:block;color:var(--muted);font-size:12px;margin-bottom:12px}
   #ticketForm .opt{color:#555}
   #ticketForm select,#ticketForm input,#ticketForm textarea{display:block;width:100%;margin-top:6px;background:#000;color:#fff;
        border:1px solid #333;border-radius:10px;padding:11px 12px;font:inherit;font-size:14px;resize:vertical}
   #ticketForm select:focus,#ticketForm input:focus,#ticketForm textarea:focus{outline:none;border-color:#666}
   .t-note{color:var(--muted);font-size:12px;line-height:1.5;margin:4px 0 14px}
+  /* Sondage déjeuner */
+  .dej{margin-top:28px}
+  .dej-box{background:var(--tile);border:1px solid var(--line);border-radius:16px;padding:14px}
+  .dej-liste{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+  .dej-opt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;background:#000;color:var(--fg);
+       border:1px solid #2a2a2a;border-radius:12px;padding:10px 12px;font:inherit}
+  .dej-opt:hover{border-color:#555}
+  .dej-opt.moi{border-color:var(--red)}
+  .dej-opt .nb{min-width:26px;height:26px;border-radius:50%;background:#222;display:grid;place-items:center;font-weight:600;font-size:12px}
+  .dej-opt.moi .nb{background:var(--red)}
+  .dej-opt .txt{flex:1;min-width:0}
+  .dej-opt .lieu{font-weight:500}
+  .dej-opt .qui{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dej-form{display:flex;gap:8px}
+  .dej-form input{flex:1;min-width:0;background:#000;border:1px solid #333;color:#fff;font:inherit;padding:10px 12px;border-radius:10px}
+  .dej-msg{color:var(--muted);font-size:12px;margin-top:8px;min-height:16px}
+  /* Citrontix (jeu façon Cémantix) */
+  .cem-cta:hover{border-color:#fff}
+  .cem-ico{width:32px;height:32px;border-radius:8px;background:#fff;color:#000;display:grid;place-items:center;
+       font-family:var(--display);font-weight:800;font-size:12px;flex:none}
+  dialog#cem{margin:auto;width:min(560px,calc(100% - 32px));max-height:88vh;background:#0d0d0d;color:var(--fg);
+       border:1px solid #2a2a2a;border-radius:18px;padding:24px}
+  dialog#cem::backdrop{background:rgba(0,0,0,.75)}
+  .cem-num{color:var(--muted);font-weight:400;font-size:14px}
+  .cem-rules{color:var(--muted);font-size:12px;line-height:1.5;margin-bottom:14px}
+  .cem-rules b{color:var(--fg)}
+  .cem-form{display:flex;gap:8px;margin-bottom:8px}
+  .cem-form input{flex:1;min-width:0;background:#000;border:1px solid #333;color:#fff;font:inherit;font-size:16px;padding:11px 14px;border-radius:10px}
+  .cem-msg{min-height:20px;font-size:13px;color:var(--muted);margin-bottom:6px}
+  .cem-msg.win{color:var(--fg);font-weight:600}
+  .cem-head,.cem-row{display:grid;grid-template-columns:40px 1fr 56px 28px 130px;align-items:center;gap:8px}
+  .cem-head{color:#666;font-size:11px;text-transform:uppercase;letter-spacing:.08em;padding:0 10px 6px}
+  .cem-row{padding:7px 10px;border-radius:8px;font-size:14px}
+  .cem-last .cem-row{background:#1c1c1c;margin-bottom:8px;border:1px solid #333}
+  .cem-list{max-height:40vh;overflow:auto}
+  .cem-row .n{color:#666;font-size:12px}
+  .cem-row .t{text-align:right;font-variant-numeric:tabular-nums}
+  .cem-row.found{background:var(--red);color:#fff}
+  .cem-prog{display:flex;align-items:center;gap:8px}
+  .cem-bar{display:block;flex:1;height:8px;background:#222;border-radius:4px;overflow:hidden;position:relative}
+  .cem-bar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#ffb3b3,var(--red));border-radius:4px}
+  .cem-pm{font-size:11px;color:var(--muted)}
+  .cem-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:10px}
+  .cem-link{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:12px}
   .annonce{margin:-20px 0 36px;padding:14px 20px;border-left:3px solid var(--red);background:var(--tile);
            border-radius:0 12px 12px 0;line-height:1.5;white-space:pre-line}
 
@@ -151,15 +196,54 @@
         <span><strong>Un problème avec ton ordi ?</strong><br><span class="sub">Le tunnel avec l'IT c'est par ici</span></span>
       </button>
     </div>
+    <div class="group">
+      <h2>Pause</h2>
+      <button class="ticket-cta cem-cta" id="cemOpen" type="button">
+        <span class="cem-ico">°C</span>
+        <span><strong>Le Citrontix du jour</strong><br><span class="sub" id="cemSub">Trouve le mot secret… à la température</span></span>
+      </button>
+    </div>
   </section>
   <aside>
     <h2>Mon agenda</h2>
     <div id="calendar"></div>
+    <div id="dej" class="dej" hidden>
+      <h2>Ça mange où ce midi la tcheam ?</h2>
+      <div class="dej-box">
+        <div id="dejListe" class="dej-liste"></div>
+        <form id="dejForm" class="dej-form">
+          <input id="dejLieu" maxlength="60" placeholder="Proposer un autre endroit…" autocomplete="off">
+          <button class="btn" type="submit">Proposer</button>
+        </form>
+        <div id="dejMsg" class="dej-msg"></div>
+      </div>
+    </div>
     <div id="reco" class="reco" hidden></div>
   </aside>
 </main>
 
 <footer>Un lien manque ou ne marche plus ? Écris à Florian sur Slack.</footer>
+
+<dialog id="cem">
+  <div class="t-head">
+    <h3>Le Citrontix du jour <span class="cem-num" id="cemNum"></span></h3>
+    <button type="button" class="t-close" id="cemClose" aria-label="Fermer">×</button>
+  </div>
+  <p class="cem-rules">Trouve le mot secret. Plus ton mot est proche par le <b>sens</b>, plus il est chaud.
+    Dans les 1000 mots les plus proches, une jauge s'affiche (1000‰ = trouvé).</p>
+  <form id="cemForm" class="cem-form">
+    <input id="cemInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Tape un mot…">
+    <button class="btn" type="submit">Envoyer</button>
+  </form>
+  <div class="cem-msg" id="cemMsg"></div>
+  <div class="cem-head"><span>#</span><span>Mot</span><span>°C</span><span></span><span>Progression</span></div>
+  <div class="cem-last" id="cemLast"></div>
+  <div class="cem-list" id="cemList"></div>
+  <div class="cem-foot">
+    <button type="button" class="cem-link" id="cemGiveUp">Je donne ma langue au chat</button>
+    <button type="button" class="btn" id="cemShare" hidden>Copier mon résultat pour Slack</button>
+  </div>
+</dialog>
 
 <dialog id="ticket">
   <form id="ticketForm" method="dialog">
@@ -200,6 +284,7 @@
   </form>
 </dialog>
 
+
 <script>
 /* ============================================================
    CONFIGURATION — c'est la seule partie à modifier au quotidien.
@@ -209,6 +294,14 @@ const DOMAINE = "blacklemon.net";
 
 // Adresse du prestataire informatique (tickets)
 const SUPPORT_EMAIL = "support-blacklemon@d-ns.fr";
+
+// Sondage déjeuner : URL de l'application Google Apps Script (voir dejeuner-apps-script.gs).
+// Laisser vide ("") pour masquer le sondage.
+const DEJ_API = "";
+
+// Citrontix : dossier où sont déposés vocab.txt et les fichiers sXXX.bin
+const CEMANTIX_DATA = "cemantix/";
+const CEMANTIX_SEMAINES = 51;   // nombre de fichiers sXXX.bin (51 semaines de mots, puis ça reboucle)
 
 // MESSAGE POUR TOUT LE MONDE — s'affiche en bandeau sous la recherche.
 // Laisser vide ("") pour ne rien afficher.
@@ -227,7 +320,7 @@ const RECO = {
 const GOOGLE_APPS = [
   { nom: "Compte",      url: "https://myaccount.google.com/" },
   { nom: "Gmail",       url: "https://mail.google.com/", icone: "data:image/png;base64,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" },
-  { nom: "Drive",       url: "https://drive.google.com/" },
+  { nom: "Drive",       url: "https://drive.google.com/", icone: "data:image/png;base64,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" },
   { nom: "Agenda",      url: "https://calendar.google.com/", icone: "data:image/png;base64,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" },
   { nom: "Meet",        url: "https://meet.google.com/" },
   { nom: "Chat",        url: "https://chat.google.com/" },
@@ -251,7 +344,7 @@ const OUTILS = [
   ]},
   { groupe: "Projets & docs", liens: [
     { nom: "Notion",       url: "https://www.notion.so/", appli: "notion://www.notion.so/" },
-    { nom: "Google Drive", url: "https://drive.google.com/" },
+    { nom: "Google Drive", url: "https://drive.google.com/", icone: "data:image/png;base64,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" },
     { nom: "Furious",      url: "https://agenceblacklemon.furious-squad.com/", icone: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFcElEQVR42u2bXYxdVRXHf2vtc+61jekYOq011ge/iD7UVjNCVJKxLdE6aaohTCPJYIJGDOFjHiRSDETmSQxI1CYl9E2DURgJxuBQ0tZJGZgQxYQY4cFJVVKJYyyhJaXTe/bZa/FwZyjagc4MZc6c2/t/usk9L+u31/fZBy5yyfkeGLveP+oNvoDRJ8Z6V7RuRgYFc06g/GRgr7ywIABjN/hng/LtZOwWpSdTUFkAsRV6zAK8VvD0hsTWvv0S5/7K5nv+9zf6sML3s8B6A3CIqeauLqCw+e8ZTWB+AD7oYayXuxTuUIFW2fk54H/ieayX4TxwO0BpF0cSzN4c86rcBgT3i6cKzHqAiwi35IH1HX7yMi+AsZv5iDmDRepsyx1epkk61wOcL6rSpINdX9tnP/X8mrMV4CyAxCczpZPtJ1MQmBwZkfJcAMLGIJ1rfFAoEq8aHJg3Bzj1a28XC6BMPLLzfpl82z6gU12/FZlGGTlvI9RpygPExHQShnbukxffEkCnhUBQaAZIxj9TYmjXPjn8tp2gwH9E2qWirpVAZktdUIiJ42cSvzPj7l37Zeq8rbDCvpnIZpzNdTTe2wSOmzNVGE+bM7brfvnTolrDZ6/3fHZUrKeapHVriFv/r8531VVXXS1qPp7Tya/tXbt6ddmP6OXu/iFFc2Npy4KgirnN4H4Mwnj23uak7P/O6RUJwK/duzZ6ukZNbxLh46qqaLgAtcrBDXMvHf9rcv9ho/jAIzK6O60YAD50z/rkzZ8HDTvASWb4BW6NBJnziJTMHzwVZ4YvGd1zsnIAfs29vSnkvw7a2J5S8a53hCqChpwYW7/KY/qWjH53ppJFydyPQrPbgja2l8tgPIC5YymiGq4uch2q1AN86Gcfjm5/zCT0Jl/erWimgZjKv+V6yWfkwW+8VokHROcrmYRe8+VfCSczQD4GJy6vLAQE3yQaKpoEnUxVo1lfZQAc1iFSkfkgIoh6T5VJsFX5JsA0VRcCwlHMKnn1LQjJDIOp6kLA7FBMqazi7b+K4G4vN2I4WBmA/KUTkwiHQ8iW3wM0gPBLGb1puroQODJS5iH7XlmW/8p0+SBkIadM8blYlvdWlXre6ATlFzf+BcrrkqXpLGTIuxgOKtI2voz/8MgNqx+69diKmQaLr9/XpyGMBAkDqIIl7AJVCBUFCaRURHN+mxK3r3po+OiK2wf44N09Zd7cjusA6pc5bBQkX+pk2PYmj+YcbYgePFMWh4+dzJ+69MBwa8UuRN6AcfNPm7xSZLRWvbOYaM44rVNRRkeK7h6qq666Wil6y8TmB6+4FNMrMbYg/j5cWrhNITpOT/GsfP6ZmY4E4Ie2fZBY3IrIdaj0kGm7XXKgdHCPIM9g/gPZ8eR4RwHwJ/q3gD9ArpfNGnvulCy0r12Y/xezO+XLEw90BAA/tO39lPFR3pN9jjMLGM0zAfNEyaAMPPloXQGcvRkSyz00wsKMZzYcggbE7/TH+jfUGoAf6P8E4t+kXGSrWxo0wqfRdFW9PcBkG6prsEUCcNp5QmXQx/uz+gJQ20S2xFbfAJdPUTSa9QUgrJu7TLtouQPepFFIfQG4v8MJTazeOQB5ntKWthNVAfEXmVkVaxwCPkFpS7tdlSuIPCYDB1r1BdDQSZA/kC/ywmgQiPYq+OO1DgHZeqQEH6Gw4wuuBjILIPl9fGliovadoOyYmER0D8lPndcTgrRdv7Df8G/5kUh9v7U4dxp8/IorQe6hoVsASLOlTmY/v8wEok3jvo+1p38sfX8+TY01/1Z4vH8DZ+yrqOzEfRMia3Ei+FFUDlLIw7LzyHMdvRAB8IcHAxuPNWg1A0XDOflSlN0vdLe6naTXAXQcLy3weKdmAAAAAElFTkSuQmCC" },
   ]},
   { groupe: "IA", liens: [
@@ -435,6 +528,166 @@ $("#ticketForm").addEventListener("submit", e => {
   e.target.reset();
   dlg.close();
 });
+
+
+// ===== Citrontix du jour (façon Cémantix) =====
+(function(){
+  const DEBUT = new Date(2026, 9, 19);
+  const auj = new Date(); auj.setHours(0,0,0,0);
+  const num = Math.floor((auj - DEBUT) / 864e5) + 1;
+  const cle = "bl_cem_" + auj.toISOString().slice(0,10);
+  const dlgC = $("#cem");
+  let etat = { essais: [], fini: false, abandon: false };
+  try { const e = JSON.parse(localStorage.getItem(cle)); if(e) etat = e; } catch(e){}
+  let vocab = null, index = null, sansAccent = null, scores = null, top = null, rangDe = null;
+  const strip = w => w.normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const sauver = () => { try { localStorage.setItem(cle, JSON.stringify(etat)); } catch(e){} };
+  $("#cemNum").textContent = "#" + num;
+
+  async function charger(){
+    if(scores) return true;
+    try {
+      const N_JOURS_FICHIER = 7;
+      const [txt, buf] = await Promise.all([
+        fetch(CEMANTIX_DATA + "vocab.txt").then(r => { if(!r.ok) throw 0; return r.text(); }),
+        fetch(CEMANTIX_DATA + "s" + String(Math.floor((num - 1) / N_JOURS_FICHIER) % CEMANTIX_SEMAINES).padStart(3,"0") + ".bin")
+          .then(r => { if(!r.ok) throw 0; return r.arrayBuffer(); }).then(b => ({ buf: b }))
+      ]);
+      vocab = txt.split("\n");
+      const N = vocab.length, taille = N + 2000;
+      const jourDansFichier = (num - 1) % N_JOURS_FICHIER;
+      const off = jourDansFichier * taille;
+      scores = new Int8Array(buf.buf, off, N);
+      top = new Uint16Array(buf.buf.slice(off + N, off + taille));
+      index = new Map(); sansAccent = new Map();
+      vocab.forEach((w, i) => { index.set(w, i); const s = strip(w); if(!sansAccent.has(s)) sansAccent.set(s, i); });
+      rangDe = new Map(); top.forEach((wi, r) => rangDe.set(wi, 1000 - r));
+      return true;
+    } catch(e){
+      $("#cemMsg").textContent = "Le jeu n'a pas pu charger ses données (il fonctionne une fois la page en ligne avec le dossier cemantix/).";
+      return false;
+    }
+  }
+  function emoji(i){
+    const pm = rangDe.get(i);
+    if(pm === 1000) return "🥳";
+    if(pm >= 990) return "😱"; if(pm >= 900) return "🔥"; if(pm >= 1) return "🥵";
+    const t = scores[i]; if(t >= 20) return "😎"; if(t >= 0) return "🥶"; return "🧊";
+  }
+  function ligne(i, n){
+    const pm = rangDe.get(i);
+    const prog = pm ? `<span class="cem-bar"><i style="width:${pm/10}%"></i></span>` : "";
+    return `<div class="cem-row${pm === 1000 ? " found" : ""}"><span class="n">${n}</span><span>${vocab[i]}</span>
+      <span class="t">${scores[i]}</span><span>${emoji(i)}</span>
+      <span class="cem-prog">${pm ? `<span class="cem-pm">${pm}‰</span>${prog}` : ""}</span></div>`;
+  }
+  function dessiner(dernier){
+    if(!scores) return;
+    const tri = etat.essais.map((i, k) => ({ i, n: k + 1 })).sort((a, b) => scores[b.i] - scores[a.i] || (rangDe.get(b.i)||0) - (rangDe.get(a.i)||0));
+    $("#cemList").innerHTML = tri.map(x => ligne(x.i, x.n)).join("");
+    $("#cemLast").innerHTML = dernier != null ? ligne(dernier, etat.essais.indexOf(dernier) + 1) : "";
+    const m = $("#cemMsg");
+    if(etat.fini){
+      m.className = "cem-msg win";
+      m.textContent = etat.abandon ? `Le mot était « ${vocab[top[0]]} ». Revanche demain !`
+                                   : `Bravo ! Trouvé en ${etat.essais.length} essais : « ${vocab[top[0]]} »`;
+    }
+    $("#cemShare").hidden = !etat.fini || etat.abandon;
+    $("#cemGiveUp").hidden = etat.fini;
+    $("#cemInput").disabled = etat.fini;
+    $("#cemSub").textContent = etat.fini ? (etat.abandon ? "Abandonné… revanche demain" : `Trouvé en ${etat.essais.length} essais — reviens demain`)
+                                         : (etat.essais.length ? `${etat.essais.length} essais, continue !` : "Trouve le mot secret… à la température");
+  }
+  $("#cemForm").addEventListener("submit", e => {
+    e.preventDefault();
+    if(!scores || etat.fini) return;
+    const brut = $("#cemInput").value.trim().toLowerCase();
+    if(!brut) return;
+    let i = index.get(brut); if(i == null) i = sansAccent.get(strip(brut));
+    const m = $("#cemMsg"); m.className = "cem-msg";
+    if(i == null){ m.textContent = `Je ne connais pas « ${brut} ».`; return; }
+    $("#cemInput").value = "";
+    if(etat.essais.includes(i)){ m.textContent = `Déjà essayé : « ${vocab[i]} ».`; dessiner(i); return; }
+    m.textContent = "";
+    etat.essais.push(i);
+    if(rangDe.get(i) === 1000) etat.fini = true;
+    sauver(); dessiner(i);
+  });
+  $("#cemGiveUp").onclick = () => {
+    if(!scores || !confirm("Sûr ? Le mot va s'afficher.")) return;
+    etat.fini = true; etat.abandon = true; sauver(); dessiner();
+  };
+  $("#cemShare").onclick = async () => {
+    const c = { "🥳":0, "😱":0, "🔥":0, "🥵":0, "😎":0, "🥶":0, "🧊":0 };
+    etat.essais.forEach(i => c[emoji(i)]++);
+    const det = Object.entries(c).filter(([k,v]) => v && k !== "🥳").map(([k,v]) => `${k} ${v}`).join("  ");
+    const txt = `Citrontix Black Lemon #${num} — trouvé en ${etat.essais.length} essais 🥳\n${det}`;
+    try { await navigator.clipboard.writeText(txt); $("#cemShare").textContent = "Copié ! Colle-le sur Slack"; }
+    catch(e){ prompt("Copie ce texte :", txt); }
+  };
+  $("#cemOpen").onclick = async () => {
+    dlgC.showModal();
+    if(await charger()) { dessiner(); $("#cemInput").focus(); }
+  };
+  $("#cemClose").onclick = () => dlgC.close();
+  if(etat.fini) $("#cemSub").textContent = etat.abandon ? "Abandonné… revanche demain" : `Trouvé en ${etat.essais.length} essais — reviens demain`;
+  else if(etat.essais.length) $("#cemSub").textContent = `${etat.essais.length} essais, continue !`;
+})();
+
+// ===== Sondage déjeuner =====
+(function(){
+  if(!DEJ_API) return;
+  const box = $("#dej"); box.hidden = false;
+  const DEJ_PERSO = "J'ai mon déj";
+  let donnees = { lieux: [] };
+  const moi = () => prenom() || store.get("bl_dej_prenom") || "";
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+  function dessiner(){
+    const p = moi().toLowerCase();
+    const lieux = donnees.lieux.slice();
+    if(!lieux.some(l => l.lieu.toLowerCase() === DEJ_PERSO.toLowerCase())) lieux.push({ lieu: DEJ_PERSO, personnes: [] });
+    lieux.sort((a, b) => (a.lieu === DEJ_PERSO) - (b.lieu === DEJ_PERSO) || b.personnes.length - a.personnes.length);
+    $("#dejListe").innerHTML = lieux.map(l => {
+      const estMoi = l.personnes.some(x => x.toLowerCase() === p);
+      return `<button type="button" class="dej-opt${estMoi ? " moi" : ""}" data-lieu="${esc(l.lieu)}">
+        <span class="nb">${l.personnes.length}</span>
+        <span class="txt"><span class="lieu">${esc(l.lieu)}</span><br>
+        <span class="qui">${l.personnes.length ? esc(l.personnes.join(", ")) : (l.lieu === DEJ_PERSO ? "Tupperware power" : "")}</span></span>
+      </button>`;
+    }).join("");
+    $("#dejListe").querySelectorAll(".dej-opt").forEach(b => b.onclick = () => {
+      const deja = b.classList.contains("moi");
+      envoyer(deja ? { action: "leave" } : { action: "join", lieu: b.dataset.lieu });
+    });
+  }
+  async function charger(){
+    try { const r = await fetch(DEJ_API); donnees = await r.json(); dessiner(); $("#dejMsg").textContent = ""; }
+    catch(e){ $("#dejMsg").textContent = "Impossible de charger le sondage pour le moment."; }
+  }
+  async function envoyer(action){
+    let p = moi();
+    if(!p){
+      p = (prompt("Ton prénom ?") || "").trim();
+      if(!p) return;
+      store.set("bl_dej_prenom", p);
+    }
+    $("#dejMsg").textContent = "Envoi…";
+    try {
+      const r = await fetch(DEJ_API, { method: "POST", body: JSON.stringify({ ...action, prenom: p }) });
+      donnees = await r.json(); dessiner(); $("#dejMsg").textContent = "";
+    } catch(e){ $("#dejMsg").textContent = "Oups, l'envoi n'a pas marché. Réessaie."; }
+  }
+  $("#dejForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const lieu = $("#dejLieu").value.trim();
+    if(!lieu) return;
+    $("#dejLieu").value = "";
+    envoyer({ action: "join", lieu });
+  });
+  dessiner(); charger();
+  setInterval(() => { if(!document.hidden) charger(); }, 60000);
+  document.addEventListener("visibilitychange", () => { if(!document.hidden) charger(); });
+})();
 </script>
 </body>
 </html>
