@@ -120,6 +120,7 @@
   .dej-msg{color:var(--muted);font-size:12px;margin-top:8px;min-height:16px}
   /* Citrontix (jeu façon Cémantix) */
   .cem-cta:hover{border-color:#fff}
+  .cem-svg{flex:none;border-radius:8px;box-shadow:0 0 0 1px #333}
   .cem-ico{width:32px;height:32px;border-radius:8px;background:#fff;color:#000;display:grid;place-items:center;
        font-family:var(--display);font-weight:800;font-size:12px;flex:none}
   dialog#cem{margin:auto;width:min(560px,calc(100% - 32px));max-height:88vh;background:#0d0d0d;color:var(--fg);
@@ -199,8 +200,8 @@
     <div class="group">
       <h2>Pause</h2>
       <button class="ticket-cta cem-cta" id="cemOpen" type="button">
-        <span class="cem-ico">°C</span>
-        <span><strong>Le Citrontix du jour</strong><br><span class="sub" id="cemSub">Trouve le mot secret… à la température</span></span>
+        <svg class="cem-svg" width="32" height="32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">  <rect width="64" height="64" rx="14" fill="#000"/>  <path d="M27 14 a5 5 0 0 1 10 0 v22.5 a9.5 9.5 0 1 1 -10 0 Z" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>  <rect x="30.5" y="24" width="3" height="18" rx="1.5" fill="#fff"/>  <circle cx="32" cy="44.5" r="5.2" fill="#FF0000"/>  <path d="M42 18h6M42 25h4M42 32h6" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>
+        <span><strong>Le Citrontix du jour</strong><br><span class="sub" id="cemSub">Trouve le mot secret...</span></span>
       </button>
     </div>
   </section>
@@ -297,7 +298,7 @@ const SUPPORT_EMAIL = "support-blacklemon@d-ns.fr";
 
 // Sondage déjeuner : URL de l'application Google Apps Script (voir dejeuner-apps-script.gs).
 // Laisser vide ("") pour masquer le sondage.
-const DEJ_API = "";
+const DEJ_API = "https://script.google.com/macros/s/AKfycbyUPDi3Abz2U4Qypg2mf2x68FOLkAa-SbdjE9uA4eYA72WChlieGTgCl-6ntJ4X04Ja9g/exec";
 
 // Citrontix : dossier où sont déposés vocab.txt et les fichiers sXXX.bin
 const CEMANTIX_DATA = "cemantix/";
@@ -532,7 +533,7 @@ $("#ticketForm").addEventListener("submit", e => {
 
 // ===== Citrontix du jour (façon Cémantix) =====
 (function(){
-  const DEBUT = new Date(2026, 9, 19);
+  const DEBUT = new Date(2026, 9, 20);   // jour n°1 du Citrontix
   const auj = new Date(); auj.setHours(0,0,0,0);
   const num = Math.floor((auj - DEBUT) / 864e5) + 1;
   const cle = "bl_cem_" + auj.toISOString().slice(0,10);
@@ -596,7 +597,7 @@ $("#ticketForm").addEventListener("submit", e => {
     $("#cemGiveUp").hidden = etat.fini;
     $("#cemInput").disabled = etat.fini;
     $("#cemSub").textContent = etat.fini ? (etat.abandon ? "Abandonné… revanche demain" : `Trouvé en ${etat.essais.length} essais — reviens demain`)
-                                         : (etat.essais.length ? `${etat.essais.length} essais, continue !` : "Trouve le mot secret… à la température");
+                                         : (etat.essais.length ? `${etat.essais.length} essais, continue !` : "Trouve le mot secret...");
   }
   $("#cemForm").addEventListener("submit", e => {
     e.preventDefault();
@@ -652,7 +653,7 @@ $("#ticketForm").addEventListener("submit", e => {
       return `<button type="button" class="dej-opt${estMoi ? " moi" : ""}" data-lieu="${esc(l.lieu)}">
         <span class="nb">${l.personnes.length}</span>
         <span class="txt"><span class="lieu">${esc(l.lieu)}</span><br>
-        <span class="qui">${l.personnes.length ? esc(l.personnes.join(", ")) : (l.lieu === DEJ_PERSO ? "Tupperware power" : "")}</span></span>
+        <span class="qui">${l.personnes.length ? esc(l.personnes.join(", ")) : (l.lieu === DEJ_PERSO ? "On tupp pas nous ??" : "")}</span></span>
       </button>`;
     }).join("");
     $("#dejListe").querySelectorAll(".dej-opt").forEach(b => b.onclick = () => {
