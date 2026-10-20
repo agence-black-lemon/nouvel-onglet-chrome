@@ -68,7 +68,6 @@
   .name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
   aside{position:sticky;top:24px}
-  aside:has(.reco:not([hidden])) .cal{height:calc(100vh - 460px)}
   .cal{background:#000;border:1px solid var(--line);border-radius:16px;overflow:hidden;height:calc(100vh - 220px);min-height:420px}
   .cal iframe{border:0;width:100%;height:100%;filter:invert(1) hue-rotate(180deg)}
   .cal-setup{background:var(--tile);border:1px solid var(--line);border-radius:16px;padding:24px}
@@ -133,7 +132,7 @@
   .cem-form input{flex:1;min-width:0;background:#000;border:1px solid #333;color:#fff;font:inherit;font-size:16px;padding:11px 14px;border-radius:10px}
   .cem-msg{min-height:20px;font-size:13px;color:var(--muted);margin-bottom:6px}
   .cem-msg.win{color:var(--fg);font-weight:600}
-  .cem-head,.cem-row{display:grid;grid-template-columns:40px 1fr 56px 28px 130px;align-items:center;gap:8px}
+  .cem-head,.cem-row{display:grid;grid-template-columns:36px 1fr 28px 150px 72px;align-items:center;gap:8px}
   .cem-head{color:#666;font-size:11px;text-transform:uppercase;letter-spacing:.08em;padding:0 10px 6px}
   .cem-row{padding:7px 10px;border-radius:8px;font-size:14px}
   .cem-last .cem-row{background:#1c1c1c;margin-bottom:8px;border:1px solid #333}
@@ -156,6 +155,52 @@
   .cl-row .m b{color:var(--fg);font-size:14px}
   .cl-vide{color:var(--muted);font-size:13px;padding:4px 10px}
   .cem-link{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:12px}
+  /* Recos musicales du jour */
+  .reco-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));align-items:start}
+  .reco-item .reco-meta{margin-top:6px}
+  .reco-form{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .reco-form input{flex:1 1 200px;min-width:0;background:#000;border:1px solid #333;color:#fff;font:inherit;padding:10px 12px;border-radius:10px}
+  .reco-info{color:var(--muted);font-size:12px;margin-top:8px;line-height:1.5;min-height:16px}
+  .reco-info strong{color:var(--fg);font-weight:500}
+  /* Brocante */
+  .broc-ico{width:32px;height:32px;border-radius:8px;background:var(--red);color:#fff;display:grid;place-items:center;flex:none;font-size:16px}
+  dialog#broc{margin:auto;width:min(760px,calc(100% - 32px));max-height:90vh;background:#0d0d0d;color:var(--fg);
+       border:1px solid #2a2a2a;border-radius:18px;padding:24px}
+  dialog#broc::backdrop{background:rgba(0,0,0,.75)}
+  .broc-intro{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:16px}
+  .broc-liste{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+  .broc-obj{background:#000;border:1px solid #2a2a2a;border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+  .broc-obj.fini{opacity:.75}
+  .broc-photo{aspect-ratio:4/3;background:#151515;display:grid;place-items:center;color:#444;font-size:12px}
+  .broc-photo img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+  .broc-corps{padding:12px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .broc-titre{font-weight:600}
+  .broc-desc{color:var(--muted);font-size:13px;line-height:1.45;white-space:pre-line}
+  .broc-lien{font-size:13px;text-decoration:underline}
+  .broc-compte{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:13px}
+  .broc-compte.gagne{color:var(--fg);font-weight:600}
+  .broc-compte.gagne b{color:var(--red)}
+  .broc-qui{color:var(--muted);font-size:12px;line-height:1.4}
+  .broc-obj .btn{margin-top:auto;width:100%}
+  .broc-obj .btn.inscrit{background:transparent;color:var(--fg);border:1px solid var(--red)}
+  .broc-admin-actions{display:flex;gap:10px}
+  .broc-vide{color:var(--muted);font-size:13px;padding:10px 0}
+  .broc-msg{min-height:18px;font-size:13px;color:var(--muted);margin-top:12px}
+  .broc-ajout{margin-top:18px;border-top:1px solid #222;padding-top:16px}
+  .broc-ajout label{display:block;color:var(--muted);font-size:12px;margin-bottom:10px}
+  .broc-ajout input,.broc-ajout textarea{display:block;width:100%;margin-top:6px;background:#000;color:#fff;border:1px solid #333;
+       border-radius:10px;padding:10px 12px;font:inherit;font-size:14px;resize:vertical}
+  .broc-ajout .ligne{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .broc-zoom{position:fixed;inset:0;background:rgba(0,0,0,.92);display:grid;place-items:center;z-index:50;cursor:zoom-out}
+  .broc-zoom img{max-width:94vw;max-height:94vh;border-radius:10px}
+  @media (max-width:600px){ .broc-ajout .ligne{grid-template-columns:1fr} dialog#broc{padding:18px} }
+  .atv-btn{display:flex;align-items:center;gap:8px;background:var(--tile);border:1px solid var(--line);color:var(--fg);
+       font:inherit;font-size:13px;font-weight:500;padding:9px 14px;border-radius:999px;cursor:pointer;white-space:nowrap}
+  .atv-btn:hover{background:var(--tile-h);border-color:var(--red)}
+  dialog#atv{margin:auto;width:min(520px,calc(100% - 32px));background:#0d0d0d;color:var(--fg);border:1px solid #2a2a2a;border-radius:18px;padding:24px}
+  dialog#atv::backdrop{background:rgba(0,0,0,.75)}
+  .atv-etapes{padding-left:20px;line-height:1.6;margin-bottom:12px}
+  .atv-etapes li{margin-bottom:8px}
   .annonce{margin:-20px 0 36px;padding:14px 20px;border-left:3px solid var(--red);background:var(--tile);
            border-radius:0 12px 12px 0;line-height:1.5;white-space:pre-line}
 
@@ -182,6 +227,10 @@
   </div>
   </div>
   <div class="h-right">
+    <button class="atv-btn" id="atvOpen" type="button" title="Recopier mon écran sur l'Apple TV">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1"/><path d="M12 15l5 6H7z"/></svg>
+      <span>Recopie d'écran</span>
+    </button>
     <div class="clock" id="clock"></div>
     <div class="gapps">
       <button class="gapps-btn" id="gappsBtn" type="button" aria-label="Applications Google" aria-expanded="false">
@@ -213,6 +262,14 @@
         <span><strong>Le Citrontix du jour</strong><br><span class="sub" id="cemSub">Trouve le mot secret...</span></span>
       </button>
     </div>
+    <div class="group" id="brocGroup" hidden>
+      <h2>Objets à donner</h2>
+      <button class="ticket-cta" id="brocOpen" type="button">
+        <span class="broc-ico">✦</span>
+        <span><strong>El brocanto del agencio blacko lemono</strong><br><span class="sub" id="brocSub">Chargement…</span></span>
+      </button>
+    </div>
+    <div id="reco" class="reco group" hidden></div>
   </section>
   <aside>
     <h2>Mon agenda</h2>
@@ -228,7 +285,6 @@
         <div id="dejMsg" class="dej-msg"></div>
       </div>
     </div>
-    <div id="reco" class="reco" hidden></div>
   </aside>
 </main>
 
@@ -240,13 +296,14 @@
     <button type="button" class="t-close" id="cemClose" aria-label="Fermer">×</button>
   </div>
   <p class="cem-rules">Trouve le mot secret. Plus ton mot est proche par le <b>sens</b>, plus il est chaud.
-    Dans les 1000 mots les plus proches, une jauge s'affiche (1000‰ = trouvé).</p>
+    Chaque mot reçoit un <b>score sur 100</b> (100 = trouvé). Dans les 1000 mots les plus proches, ton <b>rang</b> s'affiche (n°1 = le plus proche).
+    Pluriels et verbes conjugués sont acceptés : « citrons » compte comme « citron ».</p>
   <form id="cemForm" class="cem-form">
     <input id="cemInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Tape un mot…">
     <button class="btn" type="submit">Envoyer</button>
   </form>
   <div class="cem-msg" id="cemMsg"></div>
-  <div class="cem-head"><span>#</span><span>Mot</span><span>°C</span><span></span><span>Progression</span></div>
+  <div class="cem-head"><span>#</span><span>Mot</span><span></span><span>Score /100</span><span class="t">Rang</span></div>
   <div class="cem-last" id="cemLast"></div>
   <div class="cem-list" id="cemList"></div>
   <div class="cem-classement" id="cemClassement" hidden>
@@ -256,6 +313,50 @@
   <div class="cem-foot">
     <button type="button" class="cem-link" id="cemGiveUp">Je donne ma langue au chat</button>
     <button type="button" class="btn" id="cemShare" hidden>Copier mon résultat pour Slack</button>
+  </div>
+</dialog>
+
+<dialog id="broc">
+  <div class="t-head">
+    <h3>El brocanto del agencio blacko lemono</h3>
+    <button type="button" class="t-close" id="brocClose" aria-label="Fermer">×</button>
+  </div>
+  <p class="broc-intro">Des objets de l'agence cherchent une nouvelle maison. Inscris-toi sur ceux qui te plaisent :
+    à la fin du décompte, un tirage au sort désigne le gagnant parmi les inscrits.</p>
+  <div class="broc-liste" id="brocListe"></div>
+  <div class="broc-msg" id="brocMsg"></div>
+  <form class="broc-ajout" id="brocAjout" hidden>
+    <h2>Ajouter un objet</h2>
+    <label>Nom de l'objet<input id="baTitre" required maxlength="80" placeholder="ex. Lampe Atollo"></label>
+    <label>Description <span class="opt">(facultatif)</span><textarea id="baDesc" rows="3" maxlength="500" placeholder="État, dimensions, où le récupérer…"></textarea></label>
+    <div class="ligne">
+      <label>Lien <span class="opt">(facultatif)</span><input id="baLien" type="url" placeholder="https://…"></label>
+      <label>Fin du décompte<input id="baFin" type="datetime-local" required></label>
+    </div>
+    <label>Photo <span class="opt">(facultatif)</span><input id="baPhoto" type="file" accept="image/*"></label>
+    <div class="broc-admin-actions">
+      <button class="btn" type="submit">Publier l'objet</button>
+      <button class="cem-link" type="button" id="baQuitter">Quitter le mode admin</button>
+    </div>
+  </form>
+  <div class="cem-foot"><span></span><button type="button" class="cem-link" id="brocAdmin">Ajouter un objet</button></div>
+</dialog>
+
+<dialog id="atv" class="atv">
+  <div class="t-head">
+    <h3>Recopie d'écran</h3>
+    <button type="button" class="t-close" id="atvClose" aria-label="Fermer">×</button>
+  </div>
+  <ol class="atv-etapes">
+    <li>Allume la télé et vérifie que ton Mac est sur le <b>même Wi-Fi</b> que l'Apple TV.</li>
+    <li>Clique sur l'icône <b>Centre de contrôle</b> en haut à droite de l'écran (les deux interrupteurs), puis sur <b>Recopie de l'écran</b>.</li>
+    <li>Choisis l'Apple TV<span id="atvNoms"></span>. Si un code s'affiche sur la télé, tape-le sur ton Mac.</li>
+    <li>Pour arrêter : même menu, clique à nouveau sur l'Apple TV.</li>
+  </ol>
+  <p class="t-note">Astuce : dans le même menu, choisis « Utiliser comme écran séparé » pour garder tes notes sur ton Mac pendant une présentation.</p>
+  <div class="cem-foot">
+    <a class="btn" href="x-apple.systempreferences:com.apple.Displays-Settings.extension">Ouvrir les réglages Écrans</a>
+    <button type="button" class="cem-link" id="atvTicket">Ça ne marche pas ? Ouvrir un ticket</button>
   </div>
 </dialog>
 
@@ -306,10 +407,13 @@
    ============================================================ */
 const DOMAINE = "blacklemon.net";
 
+// Recopie d'écran : noms des Apple TV tels qu'ils apparaissent dans le menu (ex. ["Salle de réunion"]). Vide = pas de nom affiché.
+const APPLE_TV = [];
+
 // Adresse du prestataire informatique (tickets)
 const SUPPORT_EMAIL = "support-blacklemon@d-ns.fr";
 
-// Sondage déjeuner : URL de l'application Google Apps Script (voir dejeuner-apps-script.gs).
+// URL de l'application Google Apps Script (code dans apps-script.gs) : sondage, Citrontix, recos, brocante.
 // Laisser vide ("") pour masquer le sondage.
 const DEJ_API = "https://script.google.com/macros/s/AKfycbyUPDi3Abz2U4Qypg2mf2x68FOLkAa-SbdjE9uA4eYA72WChlieGTgCl-6ntJ4X04Ja9g/exec";
 
@@ -321,8 +425,8 @@ const CEMANTIX_SEMAINES = 51;   // nombre de fichiers sXXX.bin (51 semaines de m
 // Laisser vide ("") pour ne rien afficher.
 const MESSAGE = "";
 
-// RECO MUSICALE DE LA SEMAINE — colle un lien Spotify, YouTube, Deezer ou Apple Music.
-// Laisser lien vide ("") pour masquer le bloc.
+// RECO MUSICALE DE SECOURS — affichée seulement les jours où l'équipe n'a proposé aucune reco
+// (les recos de l'équipe sont proposées directement sur la page). Laisser lien vide ("") pour ne rien afficher.
 const RECO = {
   lien: "https://open.spotify.com/track/47ur3v3BkQwfTvvK4UOoV4",
   par:  "Flo",   // qui recommande (ex. "Paloma")
@@ -484,34 +588,241 @@ function afficherAgenda(){
 }
 afficherAgenda();
 
-// Reco musicale : transforme le lien collé en lecteur intégré
-(function(){
-  const lien = (RECO.lien || "").trim();
-  if(!lien) return;
-  let u; try { u = new URL(lien); } catch(e){ return; }
+// Petits utilitaires partagés (sondage, recos, brocante)
+const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+const monPrenom = () => prenom() || store.get("bl_dej_prenom") || "";
+function demanderPrenom(question){
+  let p = monPrenom();
+  if(!p){ p = (prompt(question || "Ton prénom ?") || "").trim(); if(p) store.set("bl_dej_prenom", p); }
+  return p;
+}
+async function api(params, corps){
+  const r = corps
+    ? await fetch(DEJ_API, { method: "POST", body: JSON.stringify(corps) })
+    : await fetch(DEJ_API + (params ? "?" + new URLSearchParams(params) : ""));
+  const d = await r.json();
+  if(d && d.erreur) throw new Error(d.erreur);
+  return d;
+}
+
+// Lecteur intégré à partir d'un lien Spotify, YouTube, Deezer ou Apple Music
+function lecteur(lien, grand){
+  let u; try { u = new URL(String(lien).trim()); } catch(e){ return ""; }
   const h = u.hostname.replace(/^www\./, "");
   let src = "", haut = 152;
   if(h === "open.spotify.com"){
     const m = u.pathname.match(/(track|album|playlist|episode|artist)\/([A-Za-z0-9]+)/);
-    if(m){ src = `https://open.spotify.com/embed/${m[1]}/${m[2]}?theme=0`; haut = (m[1] === "track" && !RECO.grand) ? 152 : 352; }
+    if(m){ src = `https://open.spotify.com/embed/${m[1]}/${m[2]}?theme=0`; haut = grand ? 352 : 152; }
   } else if(h === "youtube.com" || h === "youtu.be" || h === "music.youtube.com"){
     const id = h === "youtu.be" ? u.pathname.slice(1) : u.searchParams.get("v");
-    if(id){ src = `https://www.youtube-nocookie.com/embed/${id}`; haut = 200; }
+    if(id){ src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}`; haut = 200; }
   } else if(h.endsWith("deezer.com")){
     const m = u.pathname.match(/(track|album|playlist)\/(\d+)/);
     if(m){ src = `https://widget.deezer.com/widget/dark/${m[1]}/${m[2]}`; haut = m[1] === "track" ? 150 : 300; }
   } else if(h === "music.apple.com"){
     src = "https://embed.music.apple.com" + u.pathname + u.search; haut = u.searchParams.get("i") ? 175 : 300;
   }
+  return src
+    ? `<iframe src="${esc(src)}" height="${haut}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`
+    : `<a class="tool" href="${esc(u.href)}" target="_blank" rel="noopener"><div class="ico"><span>♪</span></div><div class="name">Écouter la reco</div></a>`;
+}
+
+// Recos musicales : 3 recos de l'équipe par jour (proposées la semaine d'avant) + formulaire
+(function(){
   const box = $("#reco");
-  const meta = (RECO.par || RECO.mot)
-    ? `<div class="reco-meta">${RECO.par ? `La reco de <strong>${RECO.par}</strong>` : ""}${RECO.par && RECO.mot ? " — " : ""}${RECO.mot || ""}</div>` : "";
-  box.innerHTML = `<h2>La reco musicale de la semaine</h2>` + (src
-    ? `<iframe src="${src}" height="${haut}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`
-    : `<a class="tool" href="${lien}" target="_blank"><div class="ico"><span>♪</span></div><div class="name">Écouter la reco</div></a>`) + meta;
-  box.hidden = false;
-  document.querySelector(".cal")?.style.setProperty("height", "calc(100vh - 460px)");
-  document.documentElement.style.setProperty("--reco", "1");
+  const secours = (RECO.lien || "").trim() ? [{ prenom: RECO.par, lien: RECO.lien, mot: RECO.mot }] : [];
+  let d = null;
+  function dessiner(){
+    const jour = d && d.jour && d.jour.length ? d.jour : secours;
+    const titre = d && d.jour && d.jour.length ? "Les recos musicales du jour" : "La reco musicale";
+    const lecteurs = jour.map(x => `<div class="reco-item">${lecteur(x.lien, false)}
+      ${(x.prenom || x.mot) ? `<div class="reco-meta">${x.prenom ? `La reco de <strong>${esc(x.prenom)}</strong>` : ""}${x.prenom && x.mot ? " — " : ""}${esc(x.mot || "")}</div>` : ""}</div>`).join("");
+    const form = DEJ_API ? `
+      <form class="reco-form" id="recoForm">
+        <input id="recoLien" type="url" required placeholder="Ta reco de la semaine : lien Spotify, YouTube, Deezer…">
+        <input id="recoMot" maxlength="120" placeholder="Un petit mot (facultatif)">
+        <button class="btn" type="submit">${d && d.maReco ? "Changer" : "Proposer"}</button>
+      </form>
+      <div class="reco-info" id="recoInfo">${d ? infos() : ""}</div>` : "";
+    if(!lecteurs && !form) return;
+    box.innerHTML = `<h2>${titre}</h2><div class="reco-grid">${lecteurs}</div>${form}`;
+    box.hidden = false;
+    const f = $("#recoForm");
+    if(f) f.onsubmit = envoyer;
+  }
+  function infos(){
+    const n = d.propositions || 0;
+    const moi = d.maReco ? `Ta reco pour la semaine prochaine : <strong>${esc(d.maReco.mot || d.maReco.lien)}</strong>. ` : "";
+    return moi + `${n} reco${n > 1 ? "s" : ""} proposée${n > 1 ? "s" : ""} cette semaine, diffusée${n > 1 ? "s" : ""} la semaine prochaine (3 par jour).`;
+  }
+  async function charger(){
+    if(!DEJ_API){ dessiner(); return; }
+    try { d = await api({ action: "reco", prenom: monPrenom() }); } catch(e){ d = null; }
+    dessiner();
+  }
+  async function envoyer(e){
+    e.preventDefault();
+    const p = demanderPrenom(); if(!p) return;
+    $("#recoInfo").textContent = "Envoi…";
+    try {
+      d = await api(null, { action: "reco_add", prenom: p, lien: $("#recoLien").value, mot: $("#recoMot").value });
+      dessiner(); $("#recoInfo").innerHTML = "C'est noté, merci ! " + infos();
+    } catch(err){ $("#recoInfo").textContent = "Oups : " + err.message; }
+  }
+  dessiner(); charger();
+})();
+
+// Brocante : objets à donner, inscription, tirage au sort à la fin du décompte
+(function(){
+  if(!DEJ_API) return;
+  $("#brocGroup").hidden = false;
+  const dlgB = $("#broc");
+  let objets = [], decalage = 0, minuteur = null;
+  const photos = {};
+  const code = () => store.get("bl_broc_code") || "";
+  const maintenant = () => Date.now() + decalage;
+  function reste(fin){
+    let s = Math.max(0, Math.floor((new Date(fin) - maintenant()) / 1000));
+    const j = Math.floor(s / 86400); s %= 86400;
+    const h = Math.floor(s / 3600); s %= 3600;
+    const m = Math.floor(s / 60); s %= 60;
+    return (j ? j + " j " : "") + (j || h ? h + " h " : "") + String(m).padStart(2, "0") + " min " + String(s).padStart(2, "0") + " s";
+  }
+  const ouvert = o => !o.gagnant && new Date(o.fin) > maintenant();
+  function resume(){
+    const actifs = objets.filter(ouvert);
+    if(!actifs.length){ $("#brocSub").textContent = objets.length ? "Tirages terminés, découvre les gagnants" : "Rien à donner pour l'instant"; return; }
+    $("#brocSub").textContent = `${actifs.length} objet${actifs.length > 1 ? "s" : ""} à gagner · prochain tirage dans ${reste(actifs[0].fin).replace(/ \d+ s$/, "")}`;
+  }
+  function dessiner(){
+    resume();
+    const p = monPrenom().toLowerCase(), admin = !!code();
+    $("#brocListe").innerHTML = objets.length ? objets.map(o => {
+      const inscrit = o.inscrits.some(x => x.toLowerCase() === p);
+      const fini = !ouvert(o);
+      const etat = o.gagnant
+        ? `<div class="broc-compte gagne">${o.gagnant === "Personne" ? "Personne ne s'est inscrit" : `Gagné par <b>${esc(o.gagnant)}</b>`}</div>`
+        : fini ? `<div class="broc-compte">Tirage en cours…</div>`
+        : `<div class="broc-compte" data-fin="${esc(o.fin)}">Tirage dans ${reste(o.fin)}</div>`;
+      const n = o.inscrits.length;
+      return `<div class="broc-obj${fini ? " fini" : ""}">
+        <div class="broc-photo" data-photo="${o.photo ? esc(o.id) : ""}">${o.photo ? (photos[o.id] ? `<img src="${photos[o.id]}" alt="">` : "…") : "Pas de photo"}</div>
+        <div class="broc-corps">
+          <div class="broc-titre">${esc(o.titre)}</div>
+          ${o.description ? `<div class="broc-desc">${esc(o.description)}</div>` : ""}
+          ${o.lien ? `<a class="broc-lien" href="${esc(o.lien)}" target="_blank" rel="noopener">Voir le lien</a>` : ""}
+          ${etat}
+          <div class="broc-qui">${n ? `${n} inscrit${n > 1 ? "s" : ""} : ${esc(o.inscrits.join(", "))}` : "Aucun inscrit pour l'instant"}</div>
+          ${fini ? "" : `<button type="button" class="btn${inscrit ? " inscrit" : ""}" data-id="${esc(o.id)}" data-act="${inscrit ? "broc_leave" : "broc_join"}">${inscrit ? "Inscrit·e ✓ — me retirer" : "Je le veux !"}</button>`}
+          ${admin ? `<div class="broc-admin-actions">
+            ${o.gagnant && o.gagnant !== "Personne" ? `<button type="button" class="cem-link" data-id="${esc(o.id)}" data-act="broc_retirer">Refaire le tirage</button>` : ""}
+            <button type="button" class="cem-link" data-id="${esc(o.id)}" data-act="broc_del">Supprimer</button></div>` : ""}
+        </div></div>`;
+    }).join("") : `<div class="broc-vide">Rien à donner pour l'instant. Reviens bientôt !</div>`;
+    $("#brocListe").querySelectorAll("button[data-act]").forEach(b => b.onclick = () => action(b.dataset.act, b.dataset.id));
+    $("#brocListe").querySelectorAll(".broc-photo img").forEach(i => i.onclick = () => zoom(i.src));
+    chargerPhotos();
+  }
+  async function chargerPhotos(){
+    for(const el of $("#brocListe").querySelectorAll(".broc-photo[data-photo]")){
+      const id = el.dataset.photo;
+      if(!id || photos[id]) continue;
+      try { photos[id] = (await api({ action: "img", id })).data; el.innerHTML = `<img src="${photos[id]}" alt="">`; el.querySelector("img").onclick = () => zoom(photos[id]); }
+      catch(e){ el.textContent = "Photo indisponible"; }
+    }
+  }
+  function zoom(src){
+    const z = document.createElement("div"); z.className = "broc-zoom"; z.innerHTML = `<img src="${src}" alt="">`;
+    z.onclick = () => z.remove(); dlgB.appendChild(z);
+  }
+  function recevoir(d){
+    objets = d.objets || [];
+    if(d.maintenant) decalage = new Date(d.maintenant) - Date.now();
+    dessiner();
+  }
+  async function charger(){
+    try { recevoir(await api({ action: "broc" })); $("#brocMsg").textContent = ""; }
+    catch(e){ $("#brocSub").textContent = "Indisponible pour le moment"; $("#brocMsg").textContent = "Impossible de charger les objets : " + e.message; }
+  }
+  async function action(act, id){
+    const corps = { action: act, id };
+    if(act === "broc_join" || act === "broc_leave"){ const p = demanderPrenom(); if(!p) return; corps.prenom = p; }
+    else {
+      if(act === "broc_del" && !confirm("Supprimer cet objet ?")) return;
+      if(act === "broc_retirer" && !confirm("Retirer le gagnant actuel et refaire un tirage parmi les autres inscrits ?")) return;
+      corps.code = code();
+    }
+    $("#brocMsg").textContent = "Envoi…";
+    try { recevoir(await api(null, corps)); $("#brocMsg").textContent = act === "broc_join" ? "Inscrit·e ! Croise les doigts." : ""; }
+    catch(e){ $("#brocMsg").textContent = "Oups : " + e.message; }
+  }
+  // Mode admin (code vérifié par le script, propriété ADMIN_CODE)
+  async function modeAdmin(){
+    if(!code()){
+      const c = (prompt("Code admin de la brocante ?") || "").trim(); if(!c) return;
+      try { await api(null, { action: "broc_check", code: c }); store.set("bl_broc_code", c); }
+      catch(e){ $("#brocMsg").textContent = e.message; return; }
+    }
+    const f = $("#brocAjout"); f.hidden = false; $("#brocAdmin").hidden = true;
+    finParDefaut(); dessiner(); $("#baTitre").focus();
+  }
+  function finParDefaut(){ // par défaut : dans 3 jours à 17 h
+    if($("#baFin").value) return;
+    const d = new Date(Date.now() + 3 * 864e5); d.setHours(17, 0, 0, 0);
+    $("#baFin").value = new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 16);
+  }
+  // Réduit la photo avant envoi (1280 px max, JPEG)
+  function reduire(fichier){
+    return new Promise((ok, ko) => {
+      const img = new Image(), url = URL.createObjectURL(fichier);
+      img.onload = () => {
+        const k = Math.min(1, 1280 / Math.max(img.width, img.height));
+        const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+        ok(c.toDataURL("image/jpeg", 0.82));
+      };
+      img.onerror = () => ko(new Error("Image illisible (format HEIC ? exporte-la en JPEG)"));
+      img.src = url;
+    });
+  }
+  $("#brocAjout").addEventListener("submit", async e => {
+    e.preventDefault();
+    $("#brocMsg").textContent = "Publication…";
+    try {
+      const f = $("#baPhoto").files[0];
+      const photo = f ? await reduire(f) : "";
+      recevoir(await api(null, { action: "broc_add", code: code(), titre: $("#baTitre").value, description: $("#baDesc").value,
+        lien: $("#baLien").value, fin: new Date($("#baFin").value).toISOString(), photo }));
+      e.target.reset(); $("#baFin").value = ""; finParDefaut(); $("#brocMsg").textContent = "Objet publié !";
+    } catch(err){ $("#brocMsg").textContent = "Oups : " + err.message; }
+  });
+  $("#baQuitter").onclick = () => { store.del("bl_broc_code"); $("#brocAjout").hidden = true; $("#brocAdmin").hidden = false; dessiner(); };
+  $("#brocAdmin").onclick = modeAdmin;
+  $("#brocOpen").onclick = () => {
+    dlgB.showModal(); charger();
+    clearInterval(minuteur);
+    minuteur = setInterval(() => {
+      let aRecharger = false;
+      dlgB.querySelectorAll("[data-fin]").forEach(el => {
+        if(new Date(el.dataset.fin) <= maintenant()) aRecharger = true;
+        else el.textContent = "Tirage dans " + reste(el.dataset.fin);
+      });
+      if(aRecharger) charger();
+    }, 1000);
+  };
+  $("#brocClose").onclick = () => dlgB.close();
+  dlgB.addEventListener("close", () => clearInterval(minuteur));
+  charger();
+  setInterval(() => { if(!document.hidden && !dlgB.open) charger(); }, 5 * 60000);
+})();
+
+// Recopie d'écran Apple TV : mode d'emploi
+(function(){
+  const d = $("#atv");
+  if(APPLE_TV.length) $("#atvNoms").innerHTML = " (" + APPLE_TV.map(n => "« <b>" + esc(n) + "</b> »").join(" ou ") + ")";
+  $("#atvOpen").onclick = () => d.showModal();
+  $("#atvClose").onclick = () => d.close();
+  $("#atvTicket").onclick = () => { d.close(); $("#ticket").showModal(); };
 })();
 
 // Ticket support : ouvre un brouillon Gmail pré-rempli
@@ -549,11 +860,11 @@ $("#ticketForm").addEventListener("submit", e => {
   const DEBUT = new Date(2026, 9, 20);   // jour n°1 du Citrontix
   const auj = new Date(); auj.setHours(0,0,0,0);
   const num = Math.floor((auj - DEBUT) / 864e5) + 1;
-  const cle = "bl_cem_" + auj.toISOString().slice(0,10);
+  const cle = "bl_cem2_" + auj.toISOString().slice(0,10);   // v2 : nouvelle base de mots
   const dlgC = $("#cem");
   let etat = { essais: [], fini: false, abandon: false };
   try { const e = JSON.parse(localStorage.getItem(cle)); if(e) etat = e; } catch(e){}
-  let vocab = null, index = null, sansAccent = null, scores = null, top = null, rangDe = null;
+  let vocab = null, index = null, sansAccent = null, alias = null, aliasSans = null, scores = null, top = null, rangDe = null;
   const strip = w => w.normalize("NFD").replace(/[̀-ͯ]/g, "");
   const sauver = () => { try { localStorage.setItem(cle, JSON.stringify(etat)); } catch(e){} };
   $("#cemNum").textContent = "#" + num;
@@ -562,10 +873,11 @@ $("#ticketForm").addEventListener("submit", e => {
     if(scores) return true;
     try {
       const N_JOURS_FICHIER = 7;
-      const [txt, buf] = await Promise.all([
+      const [txt, buf, als] = await Promise.all([
         fetch(CEMANTIX_DATA + "vocab.txt").then(r => { if(!r.ok) throw 0; return r.text(); }),
         fetch(CEMANTIX_DATA + "s" + String(Math.floor((num - 1) / N_JOURS_FICHIER) % CEMANTIX_SEMAINES).padStart(3,"0") + ".bin")
-          .then(r => { if(!r.ok) throw 0; return r.arrayBuffer(); }).then(b => ({ buf: b }))
+          .then(r => { if(!r.ok) throw 0; return r.arrayBuffer(); }).then(b => ({ buf: b })),
+        fetch(CEMANTIX_DATA + "alias.txt").then(r => r.ok ? r.text() : "").catch(() => "")   // formes fléchies → mot de base
       ]);
       vocab = txt.split("\n");
       const N = vocab.length, taille = N + 2000;
@@ -575,6 +887,9 @@ $("#ticketForm").addEventListener("submit", e => {
       top = new Uint16Array(buf.buf.slice(off + N, off + taille));
       index = new Map(); sansAccent = new Map();
       vocab.forEach((w, i) => { index.set(w, i); const s = strip(w); if(!sansAccent.has(s)) sansAccent.set(s, i); });
+      alias = new Map(); aliasSans = new Map();
+      als.split("\n").forEach(l => { const k = l.indexOf(" "); if(k < 1) return; const f = l.slice(0, k), i = +l.slice(k + 1);
+        alias.set(f, i); const s = strip(f); if(!aliasSans.has(s)) aliasSans.set(s, i); });
       rangDe = new Map(); top.forEach((wi, r) => rangDe.set(wi, 1000 - r));
       return true;
     } catch(e){
@@ -589,11 +904,11 @@ $("#ticketForm").addEventListener("submit", e => {
     const t = scores[i]; if(t >= 20) return "😎"; if(t >= 0) return "🥶"; return "🧊";
   }
   function ligne(i, n){
-    const pm = rangDe.get(i);
-    const prog = pm ? `<span class="cem-bar"><i style="width:${pm/10}%"></i></span>` : "";
-    return `<div class="cem-row${pm === 1000 ? " found" : ""}"><span class="n">${n}</span><span>${vocab[i]}</span>
-      <span class="t">${scores[i]}</span><span>${emoji(i)}</span>
-      <span class="cem-prog">${pm ? `<span class="cem-pm">${pm}‰</span>${prog}` : ""}</span></div>`;
+    const pm = rangDe.get(i), sc = scores[i];
+    const rang = pm ? (pm === 1000 ? "Trouvé" : "n°" + (1000 - pm)) : "";
+    return `<div class="cem-row${pm === 1000 ? " found" : ""}"><span class="n">${n}</span><span>${vocab[i]}</span><span>${emoji(i)}</span>
+      <span class="cem-prog"><span class="cem-pm t" style="min-width:26px">${sc}</span><span class="cem-bar"><i style="width:${Math.max(0, sc)}%"></i></span></span>
+      <span class="cem-pm t">${rang}</span></div>`;
   }
   function dessiner(dernier){
     if(!scores) return;
@@ -617,12 +932,16 @@ $("#ticketForm").addEventListener("submit", e => {
     if(!scores || etat.fini) return;
     const brut = $("#cemInput").value.trim().toLowerCase();
     if(!brut) return;
-    let i = index.get(brut); if(i == null) i = sansAccent.get(strip(brut));
+    let i = index.get(brut);
+    if(i == null) i = alias.get(brut);
+    if(i == null) i = sansAccent.get(strip(brut));
+    if(i == null) i = aliasSans.get(strip(brut));
+    if(i == null && /[sx]$/.test(brut)) i = index.get(brut.slice(0, -1)) ?? sansAccent.get(strip(brut.slice(0, -1)));   // pluriel simple
     const m = $("#cemMsg"); m.className = "cem-msg";
     if(i == null){ m.textContent = `Je ne connais pas « ${brut} ».`; return; }
     $("#cemInput").value = "";
     if(etat.essais.includes(i)){ m.textContent = `Déjà essayé : « ${vocab[i]} ».`; dessiner(i); return; }
-    m.textContent = "";
+    m.textContent = vocab[i] !== brut ? `« ${brut} » compte comme « ${vocab[i]} ».` : "";
     etat.essais.push(i);
     if(rangDe.get(i) === 1000) etat.fini = true;
     sauver(); dessiner(i);
