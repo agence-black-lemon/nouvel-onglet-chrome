@@ -157,6 +157,16 @@
   .cem-link{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:12px}
   /* Recos musicales du jour */
   .reco-play{width:100%;font:inherit;color:var(--fg);cursor:pointer;text-align:left}
+  .reco-tete{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .reco-pf{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+  .reco-pf select{background:var(--tile);color:var(--fg);border:1px solid #333;border-radius:8px;padding:5px 8px;font:inherit;font-size:12px}
+  .reco-titre{font-weight:500;margin-bottom:8px}
+  .yt,.yt-frame{display:block;width:100%;aspect-ratio:16/9;max-height:170px;border:0;border-radius:12px;background:#111;overflow:hidden}
+  .yt{position:relative;padding:0;cursor:pointer}
+  .yt img{width:100%;height:100%;object-fit:cover;display:block;opacity:.85}
+  .yt:hover img{opacity:1}
+  .yt-play{position:absolute;inset:0;margin:auto;width:52px;height:36px;border-radius:10px;background:var(--red);color:#fff;
+       display:grid;place-items:center;font-size:16px}
   .reco-play:hover{border-color:var(--red)}
   .reco-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));align-items:start}
   .reco-item .reco-meta{margin-top:6px}
@@ -177,6 +187,7 @@
   .broc-photo img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
   .broc-corps{padding:12px;display:flex;flex-direction:column;gap:6px;flex:1}
   .broc-titre{font-weight:600}
+  .broc-qte{color:var(--red);font-weight:500;font-size:12px;white-space:nowrap}
   .broc-desc{color:var(--muted);font-size:13px;line-height:1.45;white-space:pre-line}
   .broc-lien{font-size:13px;text-decoration:underline}
   .broc-compte{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:13px}
@@ -185,7 +196,7 @@
   .broc-qui{color:var(--muted);font-size:12px;line-height:1.4}
   .broc-obj .btn{margin-top:auto;width:100%}
   .broc-obj .btn.inscrit{background:transparent;color:var(--fg);border:1px solid var(--red)}
-  .broc-admin-actions{display:flex;gap:10px}
+  .broc-admin-actions{display:flex;gap:10px;flex-wrap:wrap}
   .broc-vide{color:var(--muted);font-size:13px;padding:10px 0}
   .broc-msg{min-height:18px;font-size:13px;color:var(--muted);margin-top:12px}
   .broc-ajout{margin-top:18px;border-top:1px solid #222;padding-top:16px}
@@ -335,6 +346,7 @@
     <div class="ligne">
       <label>Lien <span class="opt">(facultatif)</span><input id="baLien" type="url" placeholder="https://…"></label>
       <label>Fin du décompte<input id="baFin" type="datetime-local" required></label>
+      <label>Nombre à gagner<input id="baQte" type="number" min="1" max="20" value="1" required></label>
     </div>
     <label>Photo <span class="opt">(facultatif)</span><input id="baPhoto" type="file" accept="image/*"></label>
     <div class="broc-admin-actions">
@@ -431,10 +443,10 @@ const MESSAGE = "";
 // RECO MUSICALE DE SECOURS — affichée seulement les jours où l'équipe n'a proposé aucune reco
 // (les recos de l'équipe sont proposées directement sur la page). Laisser lien vide ("") pour ne rien afficher.
 const RECO = {
-  lien: "https://open.spotify.com/track/1kY2dTf9Tpa8QRHlAJeRYd?si=CMNkMpzQSNWsdDAHH7n-VA&utm_source=copy-link",
-  par:  "Flo",   // qui recommande (ex. "Paloma")
-  mot:  "",   // un petit mot (facultatif)
-  grand: true, // true = grand lecteur avec la pochette, false = lecteur compact
+  titre: "Suga Suga — Népal feat. Doum's",   // titre et artiste : permet à chacun de l'ouvrir sur sa plateforme
+  lien:  "",    // lien Spotify (facultatif) : affiche le lecteur pour ceux qui ont choisi Spotify
+  par:   "Flo", // qui recommande
+  mot:   "",    // un petit mot (facultatif)
 };
 
 // Applications du menu "9 points" (en haut à droite)
@@ -637,42 +649,83 @@ function lecteur(lien, grand){
     : `<a class="tool" href="${esc(u.href)}" target="_blank" rel="noopener"><div class="ico"><span>♪</span></div><div class="name">Écouter la reco</div></a>`;
 }
 
-// Aperçu léger d'une reco : le lecteur (lourd) ne se charge qu'au clic
-function facade(lien, k){
-  let h = ""; try { h = new URL(String(lien)).hostname.replace(/^www\./, ""); } catch(e){ return ""; }
-  if(h === "open.spotify.com") return lecteur(lien, false);   // Spotify : lecteur intégré directement
-  const src = /youtu/.test(h) ? "YouTube" : /deezer/.test(h) ? "Deezer" : /apple/.test(h) ? "Apple Music" : h;
-  return `<a class="tool" href="${esc(lien)}" target="_blank" rel="noopener"><div class="ico"><span>▶</span></div><div class="name">Écouter sur ${esc(src)}</div></a>`;
+// Plateformes d'écoute : chacun choisit la sienne (mémorisée dans le navigateur)
+const PLATEFORMES = {
+  spotify:    { nom: "Spotify",      hote: /spotify\.com$/,      cherche: q => "https://open.spotify.com/search/" + encodeURIComponent(q) },
+  apple:      { nom: "Apple Music",  hote: /music\.apple\.com$/, cherche: q => "https://music.apple.com/fr/search?term=" + encodeURIComponent(q) },
+  deezer:     { nom: "Deezer",       hote: /deezer\.com$/,       cherche: q => "https://www.deezer.com/search/" + encodeURIComponent(q) },
+  amazon:     { nom: "Amazon Music", hote: /music\.amazon\./,    cherche: q => "https://music.amazon.fr/search/" + encodeURIComponent(q) },
+  tidal:      { nom: "Tidal",        hote: /tidal\.com$/,        cherche: q => "https://tidal.com/search?q=" + encodeURIComponent(q) },
+  soundcloud: { nom: "SoundCloud",   hote: /soundcloud\.com$/,   cherche: q => "https://soundcloud.com/search/sounds?q=" + encodeURIComponent(q) },
+};
+const maPlateforme = () => PLATEFORMES[store.get("bl_plateforme")] ? store.get("bl_plateforme") : "spotify";
+function sourceDe(lien){
+  let h = ""; try { h = new URL(String(lien)).hostname.replace(/^www\./, ""); } catch(e){ return null; }
+  return Object.keys(PLATEFORMES).find(k => PLATEFORMES[k].hote.test(h)) || h;
+}
+// Affiche une reco selon la plateforme choisie : lecteur Spotify, lien direct, ou recherche du titre
+// Identifiant d'une vidéo YouTube (youtube.com/watch?v=…, youtu.be/…, music.youtube.com, shorts)
+function idYouTube(lien){
+  let u; try { u = new URL(String(lien)); } catch(e){ return ""; }
+  const h = u.hostname.replace(/^(www|m)\./, "");
+  if(h === "youtu.be") return u.pathname.slice(1).split("/")[0];
+  if(/(^|\.)youtube\.com$/.test(h)) return u.searchParams.get("v") || (u.pathname.match(/\/(shorts|embed)\/([\w-]+)/) || [])[2] || "";
+  return "";
+}
+// Petit lecteur YouTube : miniature légère, la vidéo ne se charge qu'au clic
+function lecteurYouTube(id){
+  id = encodeURIComponent(id);
+  return `<button type="button" class="yt" data-yt="${id}" aria-label="Lire la vidéo">
+    <img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy"><span class="yt-play">▶</span></button>`;
+}
+function ecoute(x){
+  const pf = maPlateforme(), src = x.lien ? sourceDe(x.lien) : null;
+  if(pf === "spotify" && src === "spotify") return lecteur(x.lien, false);
+  const yt = x.lien ? idYouTube(x.lien) : "";
+  if(yt) return lecteurYouTube(yt);
+  let url = "", nom = PLATEFORMES[pf].nom;
+  if(src === pf) url = x.lien;
+  else if(x.titre) url = PLATEFORMES[pf].cherche(x.titre.replace(/\s*[—–-]\s*/g, " ").replace(/\bfeat\.?\s*/i, ""));
+  else if(x.lien){ url = x.lien; nom = PLATEFORMES[src] ? PLATEFORMES[src].nom : /youtu/.test(src) ? "YouTube" : src; }
+  if(!url) return "";
+  return `<a class="tool reco-play" href="${esc(url)}" target="_blank" rel="noopener"><div class="ico"><span>▶</span></div><div class="name">Écouter sur ${esc(nom)}</div></a>`;
 }
 
 // Recos musicales : 3 recos de l'équipe par jour (proposées la semaine d'avant) + formulaire
 (function(){
   const box = $("#reco");
-  const secours = (RECO.lien || "").trim() ? [{ prenom: RECO.par, lien: RECO.lien, mot: RECO.mot }] : [];
+  const secours = (RECO.lien || RECO.titre || "").trim() ? [{ prenom: RECO.par, lien: (RECO.lien || "").trim(), mot: RECO.mot, titre: RECO.titre }] : [];
   let d = null;
   function dessiner(){
     const jour = d && d.jour && d.jour.length ? d.jour : secours;
     const titre = d && d.jour && d.jour.length ? "Les recos musicales du jour" : "La reco musicale";
-    const lecteurs = jour.map((x, k) => `<div class="reco-item">${facade(x.lien, k)}
+    const choix = `<label class="reco-pf">J'écoute sur
+      <select id="recoPf">${Object.keys(PLATEFORMES).map(k => `<option value="${k}"${k === maPlateforme() ? " selected" : ""}>${PLATEFORMES[k].nom}</option>`).join("")}</select></label>`;
+    const lecteurs = jour.map(x => `<div class="reco-item">${x.titre ? `<div class="reco-titre">${esc(x.titre)}</div>` : ""}${ecoute(x)}
       ${(x.prenom || x.mot) ? `<div class="reco-meta">${x.prenom ? `La reco de <strong>${esc(x.prenom)}</strong>` : ""}${x.prenom && x.mot ? " — " : ""}${esc(x.mot || "")}</div>` : ""}</div>`).join("");
     const form = DEJ_API ? `
       <form class="reco-form" id="recoForm">
-        <input id="recoLien" type="url" required placeholder="Ta reco de la semaine : lien Spotify (de préférence)">
+        <input id="recoTitre" required maxlength="120" placeholder="Ta reco : titre — artiste">
+        <input id="recoLien" type="url" placeholder="Lien Spotify ou YouTube (facultatif)">
         <input id="recoMot" maxlength="120" placeholder="Un petit mot (facultatif)">
-        <button class="btn" type="submit">${d && d.maReco ? "Changer" : "Proposer"}</button>
+        <button class="btn" type="submit">Proposer</button>
       </form>
       <div class="reco-info" id="recoInfo">${d ? infos() : ""}</div>` : "";
     if(!lecteurs && !form) return;
-    box.innerHTML = `<h2>${titre}</h2><div class="reco-grid">${lecteurs}</div>${form}`;
+    box.innerHTML = `<div class="reco-tete"><h2>${titre}</h2>${lecteurs ? choix : ""}</div><div class="reco-grid">${lecteurs}</div>${form}`;
     box.hidden = false;
-    box.querySelectorAll(".reco-play").forEach(b => b.onclick = () => { b.outerHTML = lecteur(b.dataset.lien, false).replace('loading="lazy"', 'loading="eager"').replace(/(embed\/[^"?]+)(\?)?/, (m, a, q) => a + (q ? "?autoplay=1&" : "?autoplay=1")); });
+    const sel = $("#recoPf"); if(sel) sel.onchange = () => { store.set("bl_plateforme", sel.value); dessiner(); };
+    box.querySelectorAll(".yt").forEach(b => b.onclick = () => {
+      b.outerHTML = `<iframe class="yt-frame" src="https://www.youtube-nocookie.com/embed/${b.dataset.yt}?autoplay=1" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+    });
     const f = $("#recoForm");
     if(f) f.onsubmit = envoyer;
   }
   function infos(){
     const n = d.propositions || 0;
-    const moi = d.maReco ? `Ta reco pour la semaine prochaine : <strong>${esc(d.maReco.mot || d.maReco.lien)}</strong>. ` : "";
-    return moi + `${n} reco${n > 1 ? "s" : ""} proposée${n > 1 ? "s" : ""} cette semaine, diffusée${n > 1 ? "s" : ""} la semaine prochaine (3 par jour).`;
+    const m = d.mesAttente || 0;
+    const moi = m ? `Tu as ${m} reco${m > 1 ? "s" : ""} en attente. ` : "";
+    return moi + (n ? `${n} reco${n > 1 ? "s" : ""} en file d'attente, diffusée${n > 1 ? "s" : ""} au fil des jours.` : "File d'attente vide : ta reco passera dès demain, voire tout de suite !");
   }
   async function charger(){
     if(!DEJ_API){ dessiner(); return; }
@@ -685,8 +738,8 @@ function facade(lien, k){
     const p = demanderPrenom(); if(!p) return;
     $("#recoInfo").textContent = "Envoi…";
     try {
-      d = await api(null, { action: "reco_add", prenom: p, lien: $("#recoLien").value, mot: $("#recoMot").value });
-      dessiner(); $("#recoInfo").innerHTML = "C'est noté, merci ! " + infos();
+      d = await api(null, { action: "reco_add", prenom: p, titre: $("#recoTitre").value, lien: $("#recoLien").value, mot: $("#recoMot").value });
+      dessiner(); $("#recoInfo").innerHTML = "C'est noté, merci ! Tu peux en proposer d'autres. " + infos();
     } catch(err){ $("#recoInfo").textContent = "Oups : " + err.message; }
   }
   dessiner(); charger();
@@ -721,25 +774,25 @@ function facade(lien, k){
       const inscrit = o.inscrits.some(x => x.toLowerCase() === p);
       const fini = !ouvert(o);
       const etat = o.gagnant
-        ? `<div class="broc-compte gagne">${o.gagnant === "Personne" ? "Personne ne s'est inscrit" : `Gagné par <b>${esc(o.gagnant)}</b>`}</div>`
+        ? `<div class="broc-compte gagne">${o.gagnant === "Personne" ? "Personne ne s'est inscrit" : `Gagné par <b>${esc(o.gagnant.split(/\s*,\s*/).join(" et "))}</b>`}</div>`
         : fini ? `<div class="broc-compte">Tirage en cours…</div>`
         : `<div class="broc-compte" data-fin="${esc(o.fin)}">Tirage dans ${reste(o.fin)}</div>`;
       const n = o.inscrits.length;
       return `<div class="broc-obj${fini ? " fini" : ""}">
         <div class="broc-photo" data-photo="${o.photo ? esc(o.id) : ""}">${o.photo ? (photos[o.id] ? `<img src="${photos[o.id]}" alt="">` : "…") : "Pas de photo"}</div>
         <div class="broc-corps">
-          <div class="broc-titre">${esc(o.titre)}</div>
+          <div class="broc-titre">${esc(o.titre)}${o.quantite > 1 ? ` <span class="broc-qte">× ${o.quantite} à gagner</span>` : ""}</div>
           ${o.description ? `<div class="broc-desc">${esc(o.description)}</div>` : ""}
           ${o.lien ? `<a class="broc-lien" href="${esc(o.lien)}" target="_blank" rel="noopener">Voir le lien</a>` : ""}
           ${etat}
           <div class="broc-qui">${n ? `${n} inscrit${n > 1 ? "s" : ""} : ${esc(o.inscrits.join(", "))}` : "Aucun inscrit pour l'instant"}</div>
           ${fini ? "" : `<button type="button" class="btn${inscrit ? " inscrit" : ""}" data-id="${esc(o.id)}" data-act="${inscrit ? "broc_leave" : "broc_join"}">${inscrit ? "Inscrit·e ✓ — me retirer" : "Je le veux !"}</button>`}
           ${admin ? `<div class="broc-admin-actions">
-            ${o.gagnant && o.gagnant !== "Personne" ? `<button type="button" class="cem-link" data-id="${esc(o.id)}" data-act="broc_retirer">Refaire le tirage</button>` : ""}
+            ${o.gagnant && o.gagnant !== "Personne" ? o.gagnant.split(/\s*,\s*/).map(g => `<button type="button" class="cem-link" data-id="${esc(o.id)}" data-qui="${esc(g)}" data-act="broc_retirer">Refaire le tirage${o.gagnant.includes(",") ? " (" + esc(g) + ")" : ""}</button>`).join("") : ""}
             <button type="button" class="cem-link" data-id="${esc(o.id)}" data-act="broc_del">Supprimer</button></div>` : ""}
         </div></div>`;
     }).join("") : `<div class="broc-vide">Rien à donner pour l'instant. Reviens bientôt !</div>`;
-    $("#brocListe").querySelectorAll("button[data-act]").forEach(b => b.onclick = () => action(b.dataset.act, b.dataset.id));
+    $("#brocListe").querySelectorAll("button[data-act]").forEach(b => b.onclick = () => action(b.dataset.act, b.dataset.id, b.dataset.qui));
     $("#brocListe").querySelectorAll(".broc-photo img").forEach(i => i.onclick = () => zoom(i.src));
     if(dlgB.open) chargerPhotos();   // photos chargées seulement quand la fenêtre est ouverte
   }
@@ -785,12 +838,15 @@ function facade(lien, k){
     try { recevoir(premier ? await INIT.then(d => d.broc).catch(() => api({ action: "broc" })) : await api({ action: "broc" })); $("#brocMsg").textContent = ""; }
     catch(e){ $("#brocSub").textContent = "Indisponible pour le moment"; $("#brocMsg").textContent = "Impossible de charger les objets : " + e.message; }
   }
-  async function action(act, id){
+  async function action(act, id, qui){
     const corps = { action: act, id };
     if(act === "broc_join" || act === "broc_leave"){ const p = demanderPrenom(); if(!p) return; corps.prenom = p; }
     else {
       if(act === "broc_del" && !confirm("Supprimer cet objet ?")) return;
-      if(act === "broc_retirer" && !confirm("Retirer le gagnant actuel et refaire un tirage parmi les autres inscrits ?")) return;
+      if(act === "broc_retirer"){
+        if(!confirm(`Retirer ${qui} et tirer un remplaçant parmi les autres inscrits ?`)) return;
+        corps.qui = qui;
+      }
       corps.code = code();
     }
     $("#brocMsg").textContent = "Envoi…";
@@ -833,7 +889,7 @@ function facade(lien, k){
       const f = $("#baPhoto").files[0];
       const photo = f ? await reduire(f) : "";
       recevoir(await api(null, { action: "broc_add", code: code(), titre: $("#baTitre").value, description: $("#baDesc").value,
-        lien: $("#baLien").value, fin: new Date($("#baFin").value).toISOString(), photo }));
+        lien: $("#baLien").value, fin: new Date($("#baFin").value).toISOString(), quantite: $("#baQte").value, photo }));
       e.target.reset(); $("#baFin").value = ""; finParDefaut(); $("#brocMsg").textContent = "Objet publié !";
     } catch(err){ $("#brocMsg").textContent = "Oups : " + err.message; }
   });
