@@ -217,6 +217,46 @@
   .annonce{margin:-20px 0 36px;padding:14px 20px;border-left:3px solid var(--red);background:var(--tile);
            border-radius:0 12px 12px 0;line-height:1.5;white-space:pre-line}
 
+  /* Soirée de Noël — « It's time » */
+  .noel{position:relative;overflow:hidden;margin:-12px 0 36px;border-radius:20px;border:1px solid #2a0000;
+       background:radial-gradient(120% 140% at 0% 0%,#3a0000 0%,#120000 45%,#000 75%);padding:28px 32px;
+       display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center}
+  .noel[hidden]{display:none}
+  .noel,.noel *{font-family:"Poppins",system-ui,sans-serif}
+  .noel-musique{margin-top:14px;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+  .noel-musique iframe{width:240px;aspect-ratio:16/9;border:0;border-radius:12px;background:#111}
+  .noel-musique .cem-link{color:var(--muted)}
+  .noel-flocons{position:absolute;inset:0;pointer-events:none}
+  .noel-flocons i{position:absolute;top:-10px;width:var(--t);height:var(--t);border-radius:50%;background:#fff;opacity:.7;
+       animation:noel-neige var(--d) linear var(--r) infinite}
+  @keyframes noel-neige{to{transform:translate(var(--x),260px);opacity:0}}
+  .noel-kicker{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#ff8a8a;margin-bottom:8px}
+  .noel-titre{position:relative;display:inline-block;font-family:var(--display);font-weight:800;font-size:clamp(40px,6.4vw,88px);line-height:.95;
+       letter-spacing:-.02em;white-space:nowrap}
+  .noel-titre .i{display:inline-block;color:var(--red);animation:noel-tiime 2.4s cubic-bezier(.2,.8,.2,1) .6s both}
+  @keyframes noel-tiime{from{letter-spacing:-.02em}to{letter-spacing:.12em}}
+  /* le givre fond à l'ouverture */
+  .noel-titre::after{content:"";position:absolute;inset:-6px -10px;border-radius:12px;pointer-events:none;
+       background:linear-gradient(135deg,rgba(220,240,255,.95),rgba(170,210,240,.85) 40%,rgba(255,255,255,.9));
+       backdrop-filter:blur(3px);animation:noel-degel 2.2s ease-out .3s forwards}
+  @keyframes noel-degel{0%{opacity:1;clip-path:inset(0 0 0 0)}100%{opacity:0;clip-path:inset(100% 0 0 0)}}
+  .noel.deja .noel-titre::after{display:none}
+  .noel.deja .noel-titre .i{animation:none;letter-spacing:.12em}
+  .noel-sous{color:#d9d9d9;margin-top:12px;font-size:15px}
+  .noel-infos{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:14px;color:var(--muted);font-size:13px}
+  .noel-infos b{color:var(--fg);font-weight:500}
+  .noel-droite{position:relative;text-align:right}
+  .noel-compte{display:flex;gap:8px;justify-content:flex-end}
+  .noel-compte div{min-width:62px;background:rgba(255,255,255,.04);border:1px solid #3a1010;border-radius:12px;padding:10px 8px;text-align:center}
+  .noel-compte b{display:block;font-family:var(--display);font-size:28px;font-weight:600;font-variant-numeric:tabular-nums}
+  .noel-compte span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .noel-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+  .noel-actions .btn.rouge{background:var(--red);color:#fff}
+  .noel-jour .noel-compte{display:none}
+  @media (max-width:800px){ .noel{grid-template-columns:1fr;padding:22px 20px} .noel-droite{text-align:left}
+       .noel-compte,.noel-actions{justify-content:flex-start} .noel-titre{white-space:normal} }
+  @media (prefers-reduced-motion:reduce){ .noel *,.noel-titre::after{animation:none!important} .noel-titre::after{display:none} .noel-titre .i{letter-spacing:.12em} }
+
   @media (max-width:1000px){
     body{padding:24px 16px}
     main{grid-template-columns:1fr}
@@ -257,6 +297,21 @@
 <form class="search" action="https://www.google.com/search" method="get">
   <input name="q" placeholder="Rechercher sur Google…" autocomplete="off" autofocus>
 </form>
+
+<section class="noel" id="noel" hidden aria-label="Soirée de Noël">
+  <div class="noel-flocons" id="noelFlocons"></div>
+  <div style="position:relative">
+    <div class="noel-kicker">Soirée de Noël</div>
+    <div class="noel-titre">IT'S T<span class="i">III</span>ME</div>
+    <div class="noel-sous" id="noelSous"></div>
+    <div class="noel-infos" id="noelInfos"></div>
+  </div>
+  <div class="noel-droite">
+    <div class="noel-compte" id="noelCompte"></div>
+    <div class="noel-actions" id="noelActions"></div>
+    <div class="noel-musique" id="noelMusique"></div>
+  </div>
+</section>
 
 <main>
   <section>
@@ -439,6 +494,22 @@ const CEMANTIX_SEMAINES = 51;   // nombre de fichiers sXXX.bin (51 semaines de m
 // MESSAGE POUR TOUT LE MONDE — s'affiche en bandeau sous la recherche.
 // Laisser vide ("") pour ne rien afficher.
 const MESSAGE = "";
+
+// SOIRÉE DE NOËL — bandeau « It's time » sous la recherche.
+// Il apparaît à partir de « afficherDes » et disparaît tout seul après « fin ». actif: false = masqué.
+// Pour le prévisualiser avant la date : ajoute #noel à la fin de l'adresse de la page.
+const NOEL = {
+  actif: true,
+  afficherDes: "2026-11-03T12:45",      // apparition du bandeau (heure de Paris)
+  debut: "2026-12-03T18:00",            // date et heure de la soirée (heure de Paris)
+  fin:   "2026-12-04T02:00",            // fin (sert à l'agenda et à masquer le bandeau après la soirée)
+  phrase: "On range son plaid et invente-moi une suite",
+  lieu: "secret place",
+  adresse: "",                          // adresse exacte (utilisée pour l'agenda), facultatif
+  dressCode: "",                        // vide = non affiché
+  rsvp: "",                             // lien d'un formulaire de réponse (facultatif)
+  musique: "yXQViqx6GMY",               // clip YouTube joué à la 1re ouverture de la page (vide = pas de musique)
+};
 
 // RECO MUSICALE DE SECOURS — affichée seulement les jours où l'équipe n'a proposé aucune reco
 // (les recos de l'équipe sont proposées directement sur la page). Laisser lien vide ("") pour ne rien afficher.
@@ -626,6 +697,76 @@ const INIT = DEJ_API
   ? api({ action: "init", prenom: monPrenom() }).then(d => { store.set("bl_init", JSON.stringify(d)); return d; })
   : Promise.reject(new Error("pas d'API"));
 INIT.catch(() => {});
+
+// Soirée de Noël : bandeau « It's time » avec décompte
+(function(){
+  const box = $("#noel");
+  if(!NOEL.actif || !box) return;
+  addEventListener("hashchange", () => { if(location.hash === "#noel") location.reload(); });
+  const apercu = location.hash === "#noel";
+  const depart = new Date(NOEL.afficherDes.includes("T") ? NOEL.afficherDes : NOEL.afficherDes + "T00:00");
+  const fin = new Date(NOEL.fin || NOEL.debut);
+  if(!apercu && Date.now() > fin) return;
+  if(!apercu && Date.now() < depart){
+    // onglet déjà ouvert avant l'heure : le bandeau apparaît tout seul à l'heure dite
+    const attente = depart - Date.now();
+    if(attente < 20 * 864e5) setTimeout(afficher, attente);
+    return;
+  }
+  afficher();
+  function afficher(){
+  const now = new Date(), debut = new Date(NOEL.debut);
+  box.hidden = false;
+  // le givre ne fond qu'une fois par jour (sinon c'est lassant à chaque nouvel onglet)
+  const cle = "bl_noel_vu_" + now.toLocaleDateString("sv-SE");
+  if(store.get(cle) && !apercu) box.classList.add("deja"); else store.set(cle, "1");
+  // quelques flocons
+  $("#noelFlocons").innerHTML = Array.from({ length: 28 }, () =>
+    `<i style="left:${Math.random() * 100}%;--t:${2 + Math.random() * 3}px;--d:${6 + Math.random() * 8}s;--r:-${Math.random() * 12}s;--x:${(Math.random() * 60 - 30).toFixed(0)}px"></i>`).join("");
+  const jourTxt = debut.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+  const heureTxt = debut.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }).replace(":", "h");
+  $("#noelSous").textContent = NOEL.phrase || "";
+  $("#noelInfos").innerHTML = [
+    `<span>📅 <b>${esc(jourTxt)}</b> à <b>${esc(heureTxt)}</b></span>`,
+    NOEL.lieu ? `<span>📍 <b>${esc(NOEL.lieu)}</b></span>` : "",
+    NOEL.dressCode ? `<span>✨ Dress code : <b>${esc(NOEL.dressCode)}</b></span>` : "",
+  ].join("");
+  // ajout à Google Agenda (lien de création d'événement pré-rempli)
+  const fmt = d => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const agenda = "https://calendar.google.com/calendar/render?action=TEMPLATE"
+    + "&text=" + encodeURIComponent("Soirée de Noël")
+    + "&dates=" + fmt(debut) + "/" + fmt(fin)
+    + "&details=" + encodeURIComponent(NOEL.phrase + (NOEL.dressCode ? "\nDress code : " + NOEL.dressCode : ""))
+    + "&location=" + encodeURIComponent(NOEL.adresse || NOEL.lieu || "");
+  $("#noelActions").innerHTML =
+    (NOEL.rsvp ? `<a class="btn rouge" href="${esc(NOEL.rsvp)}" target="_blank" rel="noopener">Je viens !</a>` : "")
+    + `<a class="btn" href="${agenda}" target="_blank" rel="noopener">Ajouter à mon agenda</a>`;
+  // Musique : seulement à la toute première ouverture de la page (par navigateur).
+  // Chrome bloque le son sans action de l'utilisateur : si le lancement automatique est refusé,
+  // la musique démarre au premier clic ou à la première touche sur la page.
+  if(NOEL.musique && (apercu || !store.get("bl_noel_musique"))){
+    if(!apercu) store.set("bl_noel_musique", "1");
+    const zone = $("#noelMusique");
+    zone.innerHTML = `<iframe id="noelYt" allow="autoplay; encrypted-media" title="All I Want for Christmas Is You"
+      src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(NOEL.musique)}?autoplay=1&enablejsapi=1&playsinline=1"></iframe>
+      <button type="button" class="cem-link" id="noelStop">Couper la musique</button>`;
+    const lancer = () => {
+      try { $("#noelYt").contentWindow.postMessage(JSON.stringify({ event: "command", func: "playVideo", args: [] }), "*"); } catch(e){}
+      removeEventListener("pointerdown", lancer, true); removeEventListener("keydown", lancer, true);
+    };
+    addEventListener("pointerdown", lancer, true); addEventListener("keydown", lancer, true);
+    $("#noelStop").onclick = () => { zone.innerHTML = ""; lancer(); };
+  }
+  function tic(){
+    let s = Math.max(0, Math.floor((debut - Date.now()) / 1000));
+    if(!s){ box.classList.add("noel-jour"); $("#noelSous").textContent = "C'est ce soir ! 🎄"; return; }
+    const j = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
+    const bloc = (v, l) => `<div><b>${String(v).padStart(2, "0")}</b><span>${l}</span></div>`;
+    $("#noelCompte").innerHTML = bloc(j, "jours") + bloc(h, "h") + bloc(m, "min") + bloc(sec, "s");
+  }
+  tic(); setInterval(tic, 1000);
+  }
+})();
 
 // Lecteur intégré à partir d'un lien Spotify, YouTube, Deezer ou Apple Music
 function lecteur(lien, grand){
