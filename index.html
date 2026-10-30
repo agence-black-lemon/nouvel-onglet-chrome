@@ -235,7 +235,8 @@
        letter-spacing:-.02em;white-space:nowrap}
   /* les « i » : une tige + un point, dessinés pour pouvoir tomber en domino */
   .nt-i{display:inline-block;white-space:nowrap}
-  .ii{position:relative;display:inline-block;width:.13em;height:.71em;margin:0 .045em;vertical-align:baseline}
+  .nt-i{position:relative;height:.71em;vertical-align:baseline}
+  .ii{position:absolute;bottom:0;width:.13em;height:.71em}
   .ii .tige{position:absolute;inset:0;background:var(--red);border-radius:.02em;transform-origin:100% 100%}
   .ii .pt{position:absolute;left:50%;top:-.27em;width:.16em;height:.16em;margin-left:-.08em;border-radius:50%;background:var(--red)}
   .noel-gauche{position:relative;min-width:0}
@@ -244,7 +245,15 @@
   .noel-sapin .boule.dos{opacity:.45;filter:none}
   .noel-sapin .eclat{fill:#fff;transform-box:fill-box;transform-origin:center;animation:noel-eclat .6s ease-out forwards}
   @keyframes noel-eclat{0%{transform:scale(.2);opacity:1}100%{transform:scale(2.6);opacity:0}}
-  .ii .pt.vole{box-shadow:0 0 .12em .04em rgba(255,60,60,.9),0 0 .3em rgba(255,0,0,.5)}
+  .fee{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden}
+  .fee .volant{position:absolute;left:0;top:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffb3b3,#ff0000 55%,#a00000);
+       box-shadow:0 0 6px 2px rgba(255,70,70,.85),0 0 18px 6px rgba(255,0,0,.35);will-change:transform}
+  .fee .paillette{position:absolute;left:0;top:0;width:8px;height:8px;margin:-4px 0 0 -4px;will-change:transform,opacity;
+       background:#fff;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);
+       filter:drop-shadow(0 0 2px #fff);animation:noel-paillette .75s ease-out forwards}
+  .fee .paillette.r{background:#ff6b6b;filter:drop-shadow(0 0 2px #ff3030)}
+  @keyframes noel-paillette{0%{opacity:1;transform:translate(var(--x),var(--y)) scale(1) rotate(0)}
+                            100%{opacity:0;transform:translate(calc(var(--x) + var(--dx)),calc(var(--y) + var(--dy))) scale(.2) rotate(90deg)}}
   .noel-sapin .noel-etoile{filter:drop-shadow(0 0 3px rgba(255,255,255,.9))}
   /* le givre fond à l'ouverture */
   .noel-titre::after{content:"";position:absolute;inset:-6px -10px;border-radius:12px;pointer-events:none;
@@ -313,7 +322,7 @@
   <div class="noel-flocons" id="noelFlocons"></div>
   <div class="noel-gauche" id="noelGauche">
     <div class="noel-kicker">Save the date</div>
-    <div class="noel-titre" id="noelTitre"><span>IT'S T</span><span class="nt-i" id="noelI"></span><span id="noelME">ME</span></div>
+    <div class="noel-titre" id="noelTitre"><span>IT'S T</span><span class="nt-i" id="noelI"></span><span id="noelEsp" style="display:inline-block;width:0"></span><span id="noelME">ME</span></div>
     <svg class="noel-sapin" id="noelSapin" viewBox="0 0 100 130" aria-hidden="true">
       <defs>
         <radialGradient id="noelGrad" cx="35%" cy="30%" r="75%">
@@ -798,20 +807,26 @@ INIT.catch(() => {});
   // et leurs points s'envolent décorer le sapin.
   function domino(direct){
     const zone = $("#noelI"), titre = $("#noelTitre"), gauche = $("#noelGauche"), sapin = $("#noelSapin"), boules = $("#noelBoules");
+    const esp = $("#noelEsp");
     const taille = parseFloat(getComputedStyle(titre).fontSize);
     sapin.getAnimations && sapin.getAnimations().forEach(a => a.cancel());
+    esp.getAnimations().forEach(a => a.cancel()); esp.style.width = "0";
+    document.querySelectorAll(".fee").forEach(f => f.remove());
     // le sapin, à droite de la colonne, posé sur la ligne du titre
     const h = taille * 2.1, l = h * 100 / 130;
     sapin.style.height = h + "px"; sapin.style.width = l + "px";
     sapin.style.bottom = (gauche.getBoundingClientRect().bottom - titre.getBoundingClientRect().bottom) + "px";
     boules.innerHTML = "";
-    // autant de « i » que nécessaire pour aller jusqu'au sapin
-    const un = () => { const e = document.createElement("span"); e.className = "ii"; e.innerHTML = '<b class="tige"></b><i class="pt"></i>'; return e; };
-    zone.innerHTML = ""; zone.appendChild(un());
-    const pas = zone.firstChild.getBoundingClientRect().width + 0.09 * taille;
-    const place = gauche.getBoundingClientRect().right - l - 0.3 * taille - titre.getBoundingClientRect().right;
-    const n = Math.max(3, Math.min(60, 1 + Math.floor(place / pas)));
-    for(let k = 1; k < n; k++) zone.appendChild(un());
+    // les « i » sont placés à intervalles strictement égaux (sinon de petits écarts d'arrondi apparaissent à la chute)
+    const W = 0.13 * taille, D = 0.22 * taille, marge = (D - W) / 2;
+    const place = gauche.getBoundingClientRect().right - l - 0.9 * taille - titre.getBoundingClientRect().right;   // garde la place pour le « ME » poussé
+    const n = Math.max(3, Math.min(60, 1 + Math.floor(place / D)));
+    zone.innerHTML = "";
+    for(let k = 0; k < n; k++){
+      const e = document.createElement("span"); e.className = "ii"; e.style.left = (marge + k * D) + "px";
+      e.innerHTML = '<b class="tige"></b><i class="pt"></i>'; zone.appendChild(e);
+    }
+    zone.style.width = (n * D) + "px";
     const ii = [...zone.children];
     // sapin « guirlande » : une spirale fine qui s'enroule autour d'un cône, les boules posées dessus
     const TOURS = 3.6, HAUT = 20, BAS = 114, RMAX = 34, N = 420;
@@ -842,52 +857,107 @@ INIT.catch(() => {});
         + (eclat ? `<circle class="eclat" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r.toFixed(2)}"/>` : "")); };
     const fin = () => {
       ii.forEach((e, k) => { if(k) e.remove(); else e.querySelector(".pt").style.opacity = 0; });
+      zone.getAnimations().forEach(a => a.cancel()); zone.style.width = D + "px";
+      esp.getAnimations().forEach(a => a.cancel()); esp.style.width = "0";
       boules.innerHTML = ""; ii.forEach((e, k) => accrocher(k));
       sapin.style.opacity = 1;
     };
     const reduit = matchMedia("(prefers-reduced-motion: reduce)").matches;
     if(direct || reduit || !ii[0].animate){ fin(); return; }
+
+    const t0 = 2600, pasT = 120;
     // le sapin (encore nu) apparaît quand le givre a fondu
-    const t0 = 2600, pasT = 110;
     sapin.animate([{ opacity: 0, transform: "translateY(10px) scale(.8)" }, { opacity: 1, transform: "none" }],
                   { duration: 500, delay: t0 - 500, fill: "forwards", easing: "ease-out" });
-    const rs = { l: gauche.getBoundingClientRect().right - l, b: titre.getBoundingClientRect().bottom };
-    // chaque « i » tombe sur le suivant, et son point s'envole aussitôt vers sa place dans le sapin
-    ii.forEach((e, k) => {
-      const tige = e.querySelector(".tige"), pt = e.querySelector(".pt"), d = t0 + k * pasT;
-      if(k) tige.animate([{ transform: "rotate(0)" }, { transform: `rotate(${k === n - 1 ? 90 : 72}deg)` }],
-                         { duration: 340, delay: d, fill: "forwards", easing: "cubic-bezier(.5,0,.9,.6)" });
-      const rp = pt.getBoundingClientRect(), [x, y, r] = slot(k);
-      const cx = rs.l + l * x / 100, cy = rs.b - h + h * y / 130;
-      const dx = cx - (rp.left + rp.width / 2), dy = cy - (rp.top + rp.height / 2);
-      const ech = (2 * r * h / 130) / rp.width;
-      // trajectoire « magique » : 2 à 4 détours tirés au hasard, durée variable, petite traînée lumineuse
-      const alea = (a, b) => a + Math.random() * (b - a);
-      const etapes = Math.floor(alea(2, 5)), duree = alea(950, 1600);
-      const kf = [{ transform: "none", offset: 0 }];
-      for(let e = 1; e <= etapes; e++){
-        const f = e / (etapes + 1);
-        kf.push({ offset: f, transform: `translate(${(dx * f + alea(-1.4, 1.4) * taille).toFixed(1)}px,${(dy * f - alea(.2, 1.3) * taille).toFixed(1)}px) scale(${(1 + alea(-.25, .35)).toFixed(2)})` });
+
+    // ---------- 1. la chute en domino, calculée image par image ----------
+    // un « i » qui tombe touche le suivant (encore debout) à l'angle « contact », ce qui le fait tomber à son tour ;
+    // un « i » déjà tombé reste appuyé sur le suivant ; au repos, tous sont parallèles, face contre face.
+    const tiges = ii.map(e => e.querySelector(".tige"));
+    const H = tiges[0].offsetHeight;
+    const repos = Math.acos(Math.min(.99, W / D)), contact = Math.asin(Math.min(.9, (D - W) / H));
+    const suit = phi => contact + phi * (repos - contact) / repos;
+    const dureeDernier = 380, debutChute = performance.now() + t0, angles = new Array(n).fill(0);
+    let ecart0 = null;
+    function image(maintenant){
+      const t = maintenant - debutChute;
+      if(t < 0){ requestAnimationFrame(image); return; }
+      if(ecart0 === null) ecart0 = $("#noelME").getBoundingClientRect().left - tiges[n - 1].getBoundingClientRect().right;
+      const front = 1 + Math.floor(t / pasT);
+      angles.fill(0);
+      if(front < n - 1){ const f = (t % pasT) / pasT; angles[front] = contact * f * f; }
+      else { const f = Math.min(1, (t - (n - 2) * pasT) / dureeDernier); angles[n - 1] = repos * f * f; }
+      for(let k = Math.min(front, n - 1) - 1; k >= 1; k--) angles[k] = suit(angles[k + 1]);
+      tiges.forEach((tg, k) => { if(k) tg.style.transform = `rotate(${(angles[k] * 180 / Math.PI).toFixed(3)}deg)`; });
+      // le dernier « i » pousse légèrement le « ME » pour avoir la place de se coucher
+      esp.style.width = Math.max(0, H * Math.sin(angles[n - 1]) - ecart0 + 1) + "px";
+      if(!(front >= n - 1 && t - (n - 2) * pasT >= dureeDernier)) requestAnimationFrame(image);
+    }
+    requestAnimationFrame(image);
+
+    // ---------- 2. les points s'envolent comme des sorts de fée, partout sur la page ----------
+    const fee = document.createElement("div"); fee.className = "fee"; document.body.appendChild(fee);
+    const alea = (a, b) => a + Math.random() * (b - a);
+    const cr = (p0, p1, p2, p3, t) => {   // spline de Catmull-Rom : une courbe douce qui passe par tous les points
+      const t2 = t * t, t3 = t2 * t;
+      return 0.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3);
+    };
+    const cibleEcran = k => { const rs = sapin.getBoundingClientRect(), [x, y, r] = slot(k);
+      return { x: rs.left + rs.width * x / 100, y: rs.top + rs.height * y / 130, d: 2 * r * rs.height / 130 }; };
+    let poses = 0, ranges = false;
+    const ranger = () => {   // tout est accroché : les « i » couchés s'effacent, le titre redevient « IT'S TIME »
+      if(ranges) return; ranges = true;
+      ii.slice(1).forEach(e => e.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 350, fill: "forwards" }));
+      zone.animate([{ width: n * D + "px" }, { width: D + "px" }], { duration: 500, delay: 200, fill: "forwards", easing: "ease-in-out" });
+      esp.animate([{ width: esp.style.width }, { width: "0px" }], { duration: 500, delay: 200, fill: "forwards", easing: "ease-in-out" });
+      setTimeout(() => { fin(); fee.remove(); }, 760);
+    };
+    ii.forEach((e, k) => setTimeout(() => {
+      const pt = e.querySelector(".pt"), rp = pt.getBoundingClientRect();
+      const v = document.createElement("i"); v.className = "volant";
+      const d0 = rp.width; v.style.width = v.style.height = d0 + "px"; v.style.margin = (-d0 / 2) + "px 0 0 " + (-d0 / 2) + "px";
+      fee.appendChild(v); pt.style.visibility = "hidden";
+      // points de passage : départ, 3 à 5 étapes n'importe où dans la fenêtre (avec de petites boucles), arrivée au sapin
+      const vw = innerWidth, vh = innerHeight, c0 = cibleEcran(k);
+      const P = [{ x: rp.left + d0 / 2, y: rp.top + d0 / 2 }];
+      P.push({ x: P[0].x + alea(-60, 60), y: P[0].y - alea(60, 140) });
+      const etapes = Math.floor(alea(3, 6));
+      for(let q = 0; q < etapes; q++){
+        const c = { x: alea(.06, .94) * vw, y: alea(.06, .9) * vh };
+        P.push(c);
+        if(Math.random() < .5){ const rr = alea(25, 70), a0 = alea(0, 6.28);   // petite boucle autour du point
+          [1, 2, 3].forEach(z => P.push({ x: c.x + rr * Math.cos(a0 + z * 2.1), y: c.y + rr * Math.sin(a0 + z * 2.1) })); }
       }
-      kf.push({ offset: 1, transform: `translate(${dx}px,${dy}px) scale(${ech})` });
-      const opts = { duration: duree, delay: d + 60, fill: "forwards", easing: "cubic-bezier(.45,.05,.35,1)" };
-      pt.classList.add("vole");
-      [.5, .3, .15].forEach((op, g) => {   // traînée : trois reflets qui suivent le même chemin avec un léger retard
-        const fantome = pt.cloneNode(); fantome.classList.add("vole");
-        fantome.style.opacity = 0; fantome.style.width = fantome.style.height = (0.16 - g * 0.03) + "em";
-        e.appendChild(fantome);
-        fantome.animate([{ opacity: 0 }, { opacity: op, offset: .05 }, { opacity: op, offset: .9 }, { opacity: 0 }],
-                        { duration: duree, delay: d + 60 + (g + 1) * 45, fill: "forwards" });
-        fantome.animate(kf, { ...opts, delay: d + 60 + (g + 1) * 45 }).onfinish = () => fantome.remove();
-      });
-      pt.animate(kf, opts).onfinish = () => { pt.style.visibility = "hidden"; pt.classList.remove("vole"); accrocher(k, true); };
-    });
-    // une fois tout tombé et accroché : les « i » couchés s'effacent, le mot redevient « IT'S TIME »
-    setTimeout(() => {
-      ii.slice(1).forEach(e => e.animate([{ width: e.offsetWidth + "px", opacity: 1 }, { width: "0px", margin: "0", opacity: 0 }],
-                                         { duration: 450, fill: "forwards", easing: "ease-in" }));
-      setTimeout(fin, 480);
-    }, t0 + n * pasT + 1900);
+      P.push({ x: c0.x + alea(-80, 80), y: c0.y - alea(60, 140) });
+      P.push({ x: c0.x, y: c0.y });
+      const Q = [P[0], ...P, P[P.length - 1]];
+      const duree = alea(2600, 3800), depart = performance.now();
+      let derniere = 0;
+      const vol = maintenant => {
+        let u = Math.min(1, (maintenant - depart) / duree);
+        const ue = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;   // accélère puis ralentit
+        const seg = Math.min(P.length - 2, Math.floor(ue * (P.length - 1))), f = ue * (P.length - 1) - seg;
+        let x = cr(Q[seg].x, Q[seg + 1].x, Q[seg + 2].x, Q[seg + 3].x, f);
+        let y = cr(Q[seg].y, Q[seg + 1].y, Q[seg + 2].y, Q[seg + 3].y, f);
+        const c = cibleEcran(k);   // si la page défile pendant le vol, l'arrivée suit le sapin
+        x += (c.x - c0.x) * ue; y += (c.y - c0.y) * ue;
+        const taillePt = d0 + (c.d - d0) * Math.pow(ue, 3);
+        v.style.transform = `translate(${x}px,${y}px) scale(${(taillePt / d0).toFixed(3)})`;
+        if(maintenant - derniere > 28 && u < .97){   // traînée de paillettes
+          derniere = maintenant;
+          const sp = document.createElement("i"); sp.className = "paillette" + (Math.random() < .35 ? " r" : "");
+          sp.style.setProperty("--x", x + alea(-4, 4) + "px"); sp.style.setProperty("--y", y + alea(-4, 4) + "px");
+          sp.style.setProperty("--dx", alea(-14, 14) + "px"); sp.style.setProperty("--dy", alea(4, 22) + "px");
+          const tz = alea(4, 9); sp.style.width = sp.style.height = tz + "px";
+          fee.appendChild(sp); setTimeout(() => sp.remove(), 800);
+        }
+        if(u < 1) requestAnimationFrame(vol);
+        else { v.remove(); accrocher(k, true); if(++poses === n) setTimeout(ranger, 350); }
+      };
+      requestAnimationFrame(vol);
+    }, t0 + k * pasT + 60));
+    // filet de sécurité si un onglet en arrière-plan a mis les animations en pause
+    setTimeout(ranger, t0 + n * pasT + 6000);
   }
   addEventListener("resize", () => { if(!box.hidden) domino(true); });
 })();
