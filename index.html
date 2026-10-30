@@ -784,14 +784,25 @@ INIT.catch(() => {});
     if(!apercu) store.set("bl_noel_musique", "1");
     const zone = $("#noelMusique");
     zone.innerHTML = `<iframe id="noelYt" allow="autoplay; encrypted-media" title="All I Want for Christmas Is You"
-      src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(NOEL.musique)}?autoplay=1&enablejsapi=1&playsinline=1"></iframe>
+      src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(NOEL.musique)}?autoplay=1&enablejsapi=1&playsinline=1&origin=${encodeURIComponent(location.origin)}"></iframe>
       <button type="button" class="cem-link" id="noelStop">Couper la musique</button>`;
+    // on écoute le lecteur pour savoir quand la musique joue vraiment
+    let joue = false;
+    const cmd = (func) => { try { $("#noelYt").contentWindow.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*"); } catch(e){} };
+    $("#noelYt").addEventListener("load", () => {
+      try { $("#noelYt").contentWindow.postMessage(JSON.stringify({ event: "listening", id: "noelYt" }), "*"); } catch(e){}
+    });
+    addEventListener("message", m => {
+      if(!/youtube/.test(m.origin)) return;
+      try { const d = JSON.parse(m.data); if(d.info && d.info.playerState === 1) joue = true; } catch(e){}
+    });
+    // Chrome refuse le son tant qu'on n'a pas cliqué ou tapé sur la page : on relance à chaque geste jusqu'à ce que ça joue
     const lancer = () => {
-      try { $("#noelYt").contentWindow.postMessage(JSON.stringify({ event: "command", func: "playVideo", args: [] }), "*"); } catch(e){}
-      removeEventListener("pointerdown", lancer, true); removeEventListener("keydown", lancer, true);
+      if(joue){ removeEventListener("pointerdown", lancer, true); removeEventListener("keydown", lancer, true); return; }
+      cmd("unMute"); cmd("playVideo");
     };
     addEventListener("pointerdown", lancer, true); addEventListener("keydown", lancer, true);
-    $("#noelStop").onclick = () => { zone.innerHTML = ""; lancer(); };
+    $("#noelStop").onclick = () => { joue = true; zone.innerHTML = ""; lancer(); };
   }
   function tic(){
     let s = Math.max(0, Math.floor((debut - Date.now()) / 1000));
@@ -917,38 +928,47 @@ INIT.catch(() => {});
       const v = document.createElement("i"); v.className = "volant";
       const d0 = rp.width; v.style.width = v.style.height = d0 + "px"; v.style.margin = (-d0 / 2) + "px 0 0 " + (-d0 / 2) + "px";
       fee.appendChild(v); pt.style.visibility = "hidden";
-      // points de passage : départ, 3 à 5 étapes n'importe où dans la fenêtre (avec de petites boucles), arrivée au sapin
-      const vw = innerWidth, vh = innerHeight, c0 = cibleEcran(k);
-      const P = [{ x: rp.left + d0 / 2, y: rp.top + d0 / 2 }];
-      P.push({ x: P[0].x + alea(-60, 60), y: P[0].y - alea(60, 140) });
-      const etapes = Math.floor(alea(3, 6));
-      for(let q = 0; q < etapes; q++){
-        const c = { x: alea(.06, .94) * vw, y: alea(.06, .9) * vh };
-        P.push(c);
-        if(Math.random() < .5){ const rr = alea(25, 70), a0 = alea(0, 6.28);   // petite boucle autour du point
-          [1, 2, 3].forEach(z => P.push({ x: c.x + rr * Math.cos(a0 + z * 2.1), y: c.y + rr * Math.sin(a0 + z * 2.1) })); }
-      }
-      P.push({ x: c0.x + alea(-80, 80), y: c0.y - alea(60, 140) });
-      P.push({ x: c0.x, y: c0.y });
-      const Q = [P[0], ...P, P[P.length - 1]];
-      const duree = alea(2600, 3800), depart = performance.now();
+      // trajectoire harmonieuse : chaque point monte en douceur, trace une grande courbe au-dessus du titre,
+      // puis s'enroule autour du sapin en spirale avant de se poser. Tous suivent la même famille de courbes,
+      // légèrement décalées : ils forment un ruban de lumière.
+      const vh = innerHeight, c0 = cibleEcran(k), rs0 = sapin.getBoundingClientRect();
+      const P0 = { x: rp.left + d0 / 2, y: rp.top + d0 / 2 };
+      const cx = rs0.left + rs0.width / 2;
+      const varie = alea(.9, 1.1);
+      const fin0 = { x: c0.x - cx, y: c0.y };   // position finale relative à l'axe du sapin
+      const rFin = Math.abs(fin0.x), angFin = fin0.x >= 0 ? 0 : Math.PI;
+      const rDeb = rs0.width * .9 * varie, tours = 1.15;
+      const spirale = s => {   // s : 0 → 1
+        const a = angFin - 2 * Math.PI * tours * (1 - s);
+        const r = rDeb + (rFin - rDeb) * s;
+        return { x: cx + r * Math.cos(a), y: c0.y - (1 - s) * rs0.height * .55 * varie + r * Math.sin(a) * .18 };
+      };
+      const A = spirale(0), A2 = spirale(.02);
+      const tg = { x: A.x - A2.x, y: A.y - A2.y }, nt = Math.hypot(tg.x, tg.y) || 1;
+      const haut = Math.max(30, Math.min(P0.y - 40, vh * .32)) * varie;
+      const c1 = { x: P0.x + (A.x - P0.x) * .15, y: P0.y - haut };
+      const c2 = { x: A.x + tg.x / nt * 160, y: A.y + tg.y / nt * 160 - haut * .4 };
+      const bez = (a, b, c, d, t) => { const m = 1 - t; return m * m * m * a + 3 * m * m * t * b + 3 * m * t * t * c + t * t * t * d; };
+      const COUPE = .58;
+      const pos = u => u < COUPE
+        ? (t => ({ x: bez(P0.x, c1.x, c2.x, A.x, t), y: bez(P0.y, c1.y, c2.y, A.y, t) }))(u / COUPE)
+        : spirale((u - COUPE) / (1 - COUPE));
+      const duree = 3000 * alea(.95, 1.05), depart = performance.now();
       let derniere = 0;
       const vol = maintenant => {
-        let u = Math.min(1, (maintenant - depart) / duree);
-        const ue = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;   // accélère puis ralentit
-        const seg = Math.min(P.length - 2, Math.floor(ue * (P.length - 1))), f = ue * (P.length - 1) - seg;
-        let x = cr(Q[seg].x, Q[seg + 1].x, Q[seg + 2].x, Q[seg + 3].x, f);
-        let y = cr(Q[seg].y, Q[seg + 1].y, Q[seg + 2].y, Q[seg + 3].y, f);
+        const u = Math.min(1, (maintenant - depart) / duree);
+        const ue = -(Math.cos(Math.PI * u) - 1) / 2;   // départ et arrivée tout en douceur
+        let { x, y } = pos(ue);
         const c = cibleEcran(k);   // si la page défile pendant le vol, l'arrivée suit le sapin
         x += (c.x - c0.x) * ue; y += (c.y - c0.y) * ue;
         const taillePt = d0 + (c.d - d0) * Math.pow(ue, 3);
         v.style.transform = `translate(${x}px,${y}px) scale(${(taillePt / d0).toFixed(3)})`;
-        if(maintenant - derniere > 28 && u < .97){   // traînée de paillettes
+        if(maintenant - derniere > 45 && u < .96){   // fine traînée de paillettes
           derniere = maintenant;
-          const sp = document.createElement("i"); sp.className = "paillette" + (Math.random() < .35 ? " r" : "");
-          sp.style.setProperty("--x", x + alea(-4, 4) + "px"); sp.style.setProperty("--y", y + alea(-4, 4) + "px");
-          sp.style.setProperty("--dx", alea(-14, 14) + "px"); sp.style.setProperty("--dy", alea(4, 22) + "px");
-          const tz = alea(4, 9); sp.style.width = sp.style.height = tz + "px";
+          const sp = document.createElement("i"); sp.className = "paillette" + (Math.random() < .2 ? " r" : "");
+          sp.style.setProperty("--x", x + "px"); sp.style.setProperty("--y", y + "px");
+          sp.style.setProperty("--dx", alea(-5, 5) + "px"); sp.style.setProperty("--dy", alea(6, 14) + "px");
+          const tz = alea(3, 6); sp.style.width = sp.style.height = tz + "px";
           fee.appendChild(sp); setTimeout(() => sp.remove(), 800);
         }
         if(u < 1) requestAnimationFrame(vol);
@@ -957,7 +977,7 @@ INIT.catch(() => {});
       requestAnimationFrame(vol);
     }, t0 + k * pasT + 60));
     // filet de sécurité si un onglet en arrière-plan a mis les animations en pause
-    setTimeout(ranger, t0 + n * pasT + 6000);
+    setTimeout(ranger, t0 + n * pasT + 5000);
   }
   addEventListener("resize", () => { if(!box.hidden) domino(true); });
 })();
