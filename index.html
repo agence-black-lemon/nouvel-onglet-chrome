@@ -242,6 +242,9 @@
   .noel-sapin{position:absolute;right:0;bottom:0;overflow:visible;opacity:0;pointer-events:none}
   .noel-sapin .boule{fill:url(#noelGrad);filter:drop-shadow(0 0 1.6px rgba(255,40,40,.7))}
   .noel-sapin .boule.dos{opacity:.45;filter:none}
+  .noel-sapin .eclat{fill:#fff;transform-box:fill-box;transform-origin:center;animation:noel-eclat .6s ease-out forwards}
+  @keyframes noel-eclat{0%{transform:scale(.2);opacity:1}100%{transform:scale(2.6);opacity:0}}
+  .ii .pt.vole{box-shadow:0 0 .12em .04em rgba(255,60,60,.9),0 0 .3em rgba(255,0,0,.5)}
   .noel-sapin .noel-etoile{filter:drop-shadow(0 0 3px rgba(255,255,255,.9))}
   /* le givre fond à l'ouverture */
   .noel-titre::after{content:"";position:absolute;inset:-6px -10px;border-radius:12px;pointer-events:none;
@@ -316,7 +319,12 @@
         <radialGradient id="noelGrad" cx="35%" cy="30%" r="75%">
           <stop offset="0" stop-color="#ff8a8a"/><stop offset=".45" stop-color="#ff0000"/><stop offset="1" stop-color="#8a0000"/>
         </radialGradient>
+        <linearGradient id="noelSilh" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity=".05"/>
+        </linearGradient>
       </defs>
+      <path class="noel-silh" fill="url(#noelSilh)" stroke="rgba(255,255,255,.55)" stroke-width=".6" stroke-linejoin="round"
+        d="M50 15 C47 29 40 39 31 47 C38 48.5 42 48 45 46.5 C39 60 29 70 20 80 C29 82 36 81 41 79 C34 93 23 104 12 114.5 C30 119 70 119 88 114.5 C77 104 66 93 59 79 C64 81 71 82 80 80 C71 70 61 60 55 46.5 C58 48 62 48.5 69 47 C60 39 53 29 50 15 Z"/>
       <g id="noelArbre"></g>
       <path class="noel-etoile" d="M50 1 C50.9 6.2 52.6 7.9 57.8 8.8 C52.6 9.7 50.9 11.4 50 16.6 C49.1 11.4 47.4 9.7 42.2 8.8 C47.4 7.9 49.1 6.2 50 1 Z" fill="#fff"/>
       <g id="noelBoules"></g>
@@ -806,7 +814,7 @@ INIT.catch(() => {});
     for(let k = 1; k < n; k++) zone.appendChild(un());
     const ii = [...zone.children];
     // sapin « guirlande » : une spirale fine qui s'enroule autour d'un cône, les boules posées dessus
-    const TOURS = 4.25, HAUT = 18, BAS = 120, RMAX = 33, N = 420;
+    const TOURS = 3.6, HAUT = 20, BAS = 114, RMAX = 34, N = 420;
     const point = t => { const a = 2 * Math.PI * TOURS * t + Math.PI / 2;
       return { x: 50 + RMAX * t * Math.sin(a), y: HAUT + (BAS - HAUT) * t, devant: Math.cos(a) >= 0 }; };
     const pts = Array.from({ length: N + 1 }, (_, q) => point(q / N));
@@ -819,7 +827,7 @@ INIT.catch(() => {});
     $("#noelArbre").innerHTML = morceaux.map(m =>
       `<polyline fill="none" stroke="#fff" stroke-linecap="round" stroke-width="${m.devant ? 1.15 : .7}" stroke-opacity="${m.devant ? .95 : .28}"
         points="${m.pts.map(p => p.x.toFixed(2) + "," + p.y.toFixed(2)).join(" ")}"/>`).join("")
-      + `<line x1="50" y1="${BAS + 1}" x2="50" y2="127" stroke="#fff" stroke-width="1.2"/>
+      + `<line x1="50" y1="117" x2="50" y2="127" stroke="#fff" stroke-width="1.4"/>
          <line x1="43" y1="127.6" x2="57" y2="127.6" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>`;
     // boules réparties à intervalles réguliers le long de la guirlande, de la base vers le sommet
     const cumul = [0];
@@ -829,8 +837,9 @@ INIT.catch(() => {});
       let q = 1; while(q < N && cumul[q] < cible) q++;
       return [pts[q].x, pts[q].y, 1.9 + 1.7 * q / N, pts[q].devant];
     };
-    const accrocher = k => { const [x, y, r, devant] = slot(k);
-      boules.insertAdjacentHTML("beforeend", `<circle class="boule${devant ? "" : " dos"}" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r.toFixed(2)}"/>`); };
+    const accrocher = (k, eclat) => { const [x, y, r, devant] = slot(k);
+      boules.insertAdjacentHTML("beforeend", `<circle class="boule${devant ? "" : " dos"}" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r.toFixed(2)}"/>`
+        + (eclat ? `<circle class="eclat" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r.toFixed(2)}"/>` : "")); };
     const fin = () => {
       ii.forEach((e, k) => { if(k) e.remove(); else e.querySelector(".pt").style.opacity = 0; });
       boules.innerHTML = ""; ii.forEach((e, k) => accrocher(k));
@@ -852,18 +861,33 @@ INIT.catch(() => {});
       const cx = rs.l + l * x / 100, cy = rs.b - h + h * y / 130;
       const dx = cx - (rp.left + rp.width / 2), dy = cy - (rp.top + rp.height / 2);
       const ech = (2 * r * h / 130) / rp.width;
-      const vol = pt.animate([{ transform: "none" },
-                              { transform: `translate(${dx * .5}px,${Math.min(dy * .5, 0) - taille * .7}px)`, offset: .5 },
-                              { transform: `translate(${dx}px,${dy}px) scale(${ech})` }],
-                             { duration: 750, delay: d + 60, fill: "forwards", easing: "ease-in-out" });
-      vol.onfinish = () => { pt.style.visibility = "hidden"; accrocher(k); };
+      // trajectoire « magique » : 2 à 4 détours tirés au hasard, durée variable, petite traînée lumineuse
+      const alea = (a, b) => a + Math.random() * (b - a);
+      const etapes = Math.floor(alea(2, 5)), duree = alea(950, 1600);
+      const kf = [{ transform: "none", offset: 0 }];
+      for(let e = 1; e <= etapes; e++){
+        const f = e / (etapes + 1);
+        kf.push({ offset: f, transform: `translate(${(dx * f + alea(-1.4, 1.4) * taille).toFixed(1)}px,${(dy * f - alea(.2, 1.3) * taille).toFixed(1)}px) scale(${(1 + alea(-.25, .35)).toFixed(2)})` });
+      }
+      kf.push({ offset: 1, transform: `translate(${dx}px,${dy}px) scale(${ech})` });
+      const opts = { duration: duree, delay: d + 60, fill: "forwards", easing: "cubic-bezier(.45,.05,.35,1)" };
+      pt.classList.add("vole");
+      [.5, .3, .15].forEach((op, g) => {   // traînée : trois reflets qui suivent le même chemin avec un léger retard
+        const fantome = pt.cloneNode(); fantome.classList.add("vole");
+        fantome.style.opacity = 0; fantome.style.width = fantome.style.height = (0.16 - g * 0.03) + "em";
+        e.appendChild(fantome);
+        fantome.animate([{ opacity: 0 }, { opacity: op, offset: .05 }, { opacity: op, offset: .9 }, { opacity: 0 }],
+                        { duration: duree, delay: d + 60 + (g + 1) * 45, fill: "forwards" });
+        fantome.animate(kf, { ...opts, delay: d + 60 + (g + 1) * 45 }).onfinish = () => fantome.remove();
+      });
+      pt.animate(kf, opts).onfinish = () => { pt.style.visibility = "hidden"; pt.classList.remove("vole"); accrocher(k, true); };
     });
     // une fois tout tombé et accroché : les « i » couchés s'effacent, le mot redevient « IT'S TIME »
     setTimeout(() => {
       ii.slice(1).forEach(e => e.animate([{ width: e.offsetWidth + "px", opacity: 1 }, { width: "0px", margin: "0", opacity: 0 }],
                                          { duration: 450, fill: "forwards", easing: "ease-in" }));
       setTimeout(fin, 480);
-    }, t0 + n * pasT + 900);
+    }, t0 + n * pasT + 1900);
   }
   addEventListener("resize", () => { if(!box.hidden) domino(true); });
 })();
