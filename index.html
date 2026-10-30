@@ -240,7 +240,9 @@
   .ii .pt{position:absolute;left:50%;top:-.27em;width:.16em;height:.16em;margin-left:-.08em;border-radius:50%;background:var(--red)}
   .noel-gauche{position:relative;min-width:0}
   .noel-sapin{position:absolute;right:0;bottom:0;overflow:visible;opacity:0;pointer-events:none}
-  .noel-sapin .boule{fill:var(--red)}
+  .noel-sapin .boule{fill:url(#noelGrad);filter:drop-shadow(0 0 1.6px rgba(255,40,40,.7))}
+  .noel-sapin .boule.dos{opacity:.45;filter:none}
+  .noel-sapin .noel-etoile{filter:drop-shadow(0 0 3px rgba(255,255,255,.9))}
   /* le givre fond à l'ouverture */
   .noel-titre::after{content:"";position:absolute;inset:-6px -10px;border-radius:12px;pointer-events:none;
        background:linear-gradient(135deg,rgba(220,240,255,.95),rgba(170,210,240,.85) 40%,rgba(255,255,255,.9));
@@ -310,9 +312,13 @@
     <div class="noel-kicker">Save the date</div>
     <div class="noel-titre" id="noelTitre"><span>IT'S T</span><span class="nt-i" id="noelI"></span><span id="noelME">ME</span></div>
     <svg class="noel-sapin" id="noelSapin" viewBox="0 0 100 130" aria-hidden="true">
-      <path d="M50 14 L22 54 H38 L14 90 H32 L8 120 H92 L68 90 H86 L62 54 H78 Z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
-      <rect x="44" y="120" width="12" height="9" fill="#fff"/>
-      <path d="M50 2 l3.2 6.6 7.2 1 -5.2 5 1.3 7.2 -6.5-3.4 -6.5 3.4 1.3-7.2 -5.2-5 7.2-1z" fill="var(--red)"/>
+      <defs>
+        <radialGradient id="noelGrad" cx="35%" cy="30%" r="75%">
+          <stop offset="0" stop-color="#ff8a8a"/><stop offset=".45" stop-color="#ff0000"/><stop offset="1" stop-color="#8a0000"/>
+        </radialGradient>
+      </defs>
+      <g id="noelArbre"></g>
+      <path class="noel-etoile" d="M50 1 C50.9 6.2 52.6 7.9 57.8 8.8 C52.6 9.7 50.9 11.4 50 16.6 C49.1 11.4 47.4 9.7 42.2 8.8 C47.4 7.9 49.1 6.2 50 1 Z" fill="#fff"/>
       <g id="noelBoules"></g>
     </svg>
     <div class="noel-sous" id="noelSous"></div>
@@ -799,16 +805,32 @@ INIT.catch(() => {});
     const n = Math.max(3, Math.min(60, 1 + Math.floor(place / pas)));
     for(let k = 1; k < n; k++) zone.appendChild(un());
     const ii = [...zone.children];
-    // emplacements des boules dans le sapin (coordonnées du dessin 100 × 130), du bas vers le haut
-    const places = [];
-    [[30, 50, 10], [48, 50, 18], [70, 50, 18], [86, 50, 26], [104, 50, 30], [114, 50, 36]].forEach(([y, cx, dl]) => {
-      for(let x = cx - dl; x <= cx + dl + 0.1; x += 10) places.push([x, y]);
+    // sapin « guirlande » : une spirale fine qui s'enroule autour d'un cône, les boules posées dessus
+    const TOURS = 4.25, HAUT = 18, BAS = 120, RMAX = 33, N = 420;
+    const point = t => { const a = 2 * Math.PI * TOURS * t + Math.PI / 2;
+      return { x: 50 + RMAX * t * Math.sin(a), y: HAUT + (BAS - HAUT) * t, devant: Math.cos(a) >= 0 }; };
+    const pts = Array.from({ length: N + 1 }, (_, q) => point(q / N));
+    const morceaux = [];
+    pts.forEach((p, q) => {
+      const m = morceaux[morceaux.length - 1];
+      if(!m || m.devant !== p.devant) morceaux.push({ devant: p.devant, pts: q ? [pts[q - 1], p] : [p] });
+      else m.pts.push(p);
     });
-    const ordre = places.sort((a, b) => b[1] - a[1] || a[0] - b[0]);
-    const slot = k => ordre[Math.round(k * (ordre.length - 1) / Math.max(1, n - 1))];
-    const r = 3.6;
-    const accrocher = k => { const [x, y] = slot(k);
-      boules.insertAdjacentHTML("beforeend", `<circle class="boule" cx="${x}" cy="${y}" r="${r}"/>`); };
+    $("#noelArbre").innerHTML = morceaux.map(m =>
+      `<polyline fill="none" stroke="#fff" stroke-linecap="round" stroke-width="${m.devant ? 1.15 : .7}" stroke-opacity="${m.devant ? .95 : .28}"
+        points="${m.pts.map(p => p.x.toFixed(2) + "," + p.y.toFixed(2)).join(" ")}"/>`).join("")
+      + `<line x1="50" y1="${BAS + 1}" x2="50" y2="127" stroke="#fff" stroke-width="1.2"/>
+         <line x1="43" y1="127.6" x2="57" y2="127.6" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>`;
+    // boules réparties à intervalles réguliers le long de la guirlande, de la base vers le sommet
+    const cumul = [0];
+    for(let q = 1; q <= N; q++) cumul[q] = cumul[q - 1] + Math.hypot(pts[q].x - pts[q - 1].x, pts[q].y - pts[q - 1].y);
+    const slot = k => {
+      const cible = cumul[N] * (0.97 - 0.85 * k / Math.max(1, n - 1));
+      let q = 1; while(q < N && cumul[q] < cible) q++;
+      return [pts[q].x, pts[q].y, 1.9 + 1.7 * q / N, pts[q].devant];
+    };
+    const accrocher = k => { const [x, y, r, devant] = slot(k);
+      boules.insertAdjacentHTML("beforeend", `<circle class="boule${devant ? "" : " dos"}" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r.toFixed(2)}"/>`); };
     const fin = () => {
       ii.forEach((e, k) => { if(k) e.remove(); else e.querySelector(".pt").style.opacity = 0; });
       boules.innerHTML = ""; ii.forEach((e, k) => accrocher(k));
@@ -826,7 +848,7 @@ INIT.catch(() => {});
       const tige = e.querySelector(".tige"), pt = e.querySelector(".pt"), d = t0 + k * pasT;
       if(k) tige.animate([{ transform: "rotate(0)" }, { transform: `rotate(${k === n - 1 ? 90 : 72}deg)` }],
                          { duration: 340, delay: d, fill: "forwards", easing: "cubic-bezier(.5,0,.9,.6)" });
-      const rp = pt.getBoundingClientRect(), [x, y] = slot(k);
+      const rp = pt.getBoundingClientRect(), [x, y, r] = slot(k);
       const cx = rs.l + l * x / 100, cy = rs.b - h + h * y / 130;
       const dx = cx - (rp.left + rp.width / 2), dy = cy - (rp.top + rp.height / 2);
       const ech = (2 * r * h / 130) / rp.width;
