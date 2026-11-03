@@ -549,7 +549,7 @@ const MESSAGE = "";
 // Pour le prévisualiser avant la date : ajoute #noel à la fin de l'adresse de la page.
 const NOEL = {
   actif: true,
-  afficherDes: "2026-11-03T12:45",      // apparition du bandeau (heure de Paris)
+  afficherDes: "2026-11-03T12:30",      // apparition du bandeau (heure de Paris)
   debut: "2026-12-03T18:00",            // date et heure de la soirée (heure de Paris)
   fin:   "2026-12-04T02:00",            // fin (sert à l'agenda et à masquer le bandeau après la soirée)
   phrase: "On range son plaid, Mariah s'occupe du reste.",
@@ -767,9 +767,7 @@ INIT.catch(() => {});
   const now = new Date(), debut = new Date(NOEL.debut);
   box.hidden = false;
   (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => domino(box.classList.contains("deja")));
-  // le givre ne fond qu'une fois par jour (sinon c'est lassant à chaque nouvel onglet)
-  const cle = "bl_noel_vu_" + now.toLocaleDateString("sv-SE");
-  if(store.get(cle) && !apercu) box.classList.add("deja"); else store.set(cle, "1");
+  // l'animation (givre, domino, sapin) se joue à chaque ouverture de la page
   // quelques flocons
   $("#noelFlocons").innerHTML = Array.from({ length: 28 }, () =>
     `<i style="left:${Math.random() * 100}%;--t:${2 + Math.random() * 3}px;--d:${6 + Math.random() * 8}s;--r:-${Math.random() * 12}s;--x:${(Math.random() * 60 - 30).toFixed(0)}px"></i>`).join("");
