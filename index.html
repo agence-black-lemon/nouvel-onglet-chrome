@@ -789,11 +789,10 @@ INIT.catch(() => {});
   $("#noelActions").innerHTML =
     (NOEL.rsvp ? `<a class="btn rouge" href="${esc(NOEL.rsvp)}" target="_blank" rel="noopener">Je viens !</a>` : "")
     + `<a class="btn" href="${agenda}" target="_blank" rel="noopener">Ajouter à mon agenda</a>`;
-  // Musique : seulement à la toute première ouverture de la page (par navigateur).
+  // Musique : à chaque ouverture de la page.
   // Chrome bloque le son sans action de l'utilisateur : si le lancement automatique est refusé,
   // la musique démarre au premier clic ou à la première touche sur la page.
-  if(NOEL.musique && (apercu || !store.get("bl_noel_musique"))){
-    if(!apercu) store.set("bl_noel_musique", "1");
+  if(NOEL.musique){   // la musique repart à chaque ouverture de la page
     const zone = $("#noelMusique");
     zone.innerHTML = `<iframe id="noelYt" allow="autoplay; encrypted-media" title="All I Want for Christmas Is You"
       src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(NOEL.musique)}?autoplay=1&enablejsapi=1&playsinline=1&origin=${encodeURIComponent(location.origin)}"></iframe>
