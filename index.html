@@ -175,6 +175,9 @@
   .reco-info{color:var(--muted);font-size:12px;margin-top:8px;line-height:1.5;min-height:16px}
   .reco-info strong{color:var(--fg);font-weight:500}
   /* Brocante */
+  .llsb-cta{text-decoration:none}
+  .llsb-cta:hover{border-color:#e3ff1f}
+  .llsb-logo{width:40px;height:auto;flex:none}
   .broc-ico{width:32px;height:32px;border-radius:8px;background:var(--red);color:#fff;display:grid;place-items:center;flex:none;font-size:16px}
   dialog#broc{margin:auto;width:min(760px,calc(100% - 32px));max-height:90vh;background:#0d0d0d;color:var(--fg);
        border:1px solid #2a2a2a;border-radius:18px;padding:24px}
@@ -365,6 +368,13 @@
         <span><strong>Le Citrontix du jour</strong><br><span class="sub" id="cemSub">Trouve le mot secret...</span></span>
       </button>
     </div>
+    <div class="group" id="llsbGroup" hidden>
+      <h2>Souvenirs du LLSB</h2>
+      <a class="ticket-cta llsb-cta" id="llsbLien" target="_blank" rel="noopener">
+        <img class="llsb-logo" src="llsb.png" alt="">
+        <span><strong>Les photos du Lemon Summer Break</strong><br><span class="sub">7 appareils, tous les souvenirs</span></span>
+      </a>
+    </div>
     <div class="group" id="brocGroup" hidden>
       <h2>Objets à donner</h2>
       <button class="ticket-cta" id="brocOpen" type="button">
@@ -512,6 +522,10 @@
    ============================================================ */
 const DOMAINE = "blacklemon.net";
 
+// PHOTOS DU LEMON SUMMER BREAK — lien du dossier Google Drive (partagé avec blacklemon.net). Vide = bouton masqué.
+const LLSB_PHOTOS = "https://drive.google.com/drive/folders/1T7ZuyyuMh4pP-PESyNn5e7HSYtXMeGw4?usp=sharing";
+const LLSB_DES = "2026-11-03T12:45";   // le bouton apparaît à partir de cette heure (heure de Paris)
+
 // Recopie d'écran : noms des Apple TV tels qu'ils apparaissent dans le menu (ex. ["Salle de réunion"]). Vide = pas de nom affiché.
 const APPLE_TV = [];
 
@@ -535,7 +549,7 @@ const MESSAGE = "";
 // Pour le prévisualiser avant la date : ajoute #noel à la fin de l'adresse de la page.
 const NOEL = {
   actif: true,
-  afficherDes: "2026-11-03T12:30",      // apparition du bandeau (heure de Paris)
+  afficherDes: "2026-11-03T12:45",      // apparition du bandeau (heure de Paris)
   debut: "2026-12-03T18:00",            // date et heure de la soirée (heure de Paris)
   fin:   "2026-12-04T02:00",            // fin (sert à l'agenda et à masquer le bandeau après la soirée)
   phrase: "On range son plaid, Mariah s'occupe du reste.",
@@ -1267,6 +1281,15 @@ function ecoute(x){
   charger(true).then(() => setTimeout(chargerPhotos, 4000));   // photos préchargées en arrière-plan, une seule fois par navigateur
   setInterval(() => { if(!document.hidden && !dlgB.open) charger(); }, 15 * 60000);
 })();
+
+// Photos du Lemon Summer Break
+if(LLSB_PHOTOS.trim()){
+  $("#llsbLien").href = LLSB_PHOTOS.trim();
+  const montrer = () => { $("#llsbGroup").hidden = false; };
+  const attente = LLSB_DES ? new Date(LLSB_DES) - Date.now() : 0;
+  if(attente <= 0 || location.hash === "#noel") montrer();
+  else if(attente < 20 * 864e5) setTimeout(montrer, attente);   // onglet déjà ouvert : apparaît tout seul à l'heure dite
+}
 
 // Recopie d'écran Apple TV : mode d'emploi
 (function(){
