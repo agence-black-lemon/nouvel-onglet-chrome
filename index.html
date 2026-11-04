@@ -557,7 +557,7 @@ const NOEL = {
   adresse: "",                          // adresse exacte (utilisée pour l'agenda), facultatif
   dressCode: "",                        // vide = non affiché
   rsvp: "",                             // lien d'un formulaire de réponse (facultatif)
-  musique: "yXQViqx6GMY",               // clip YouTube joué à la 1re ouverture de la page (vide = pas de musique)
+  musique: "",                          // clip YouTube (ex. "yXQViqx6GMY") ; vide = pas de musique               // clip YouTube joué à la 1re ouverture de la page (vide = pas de musique)
 };
 
 // RECO MUSICALE DE SECOURS — affichée seulement les jours où l'équipe n'a proposé aucune reco
@@ -767,7 +767,10 @@ INIT.catch(() => {});
   const now = new Date(), debut = new Date(NOEL.debut);
   box.hidden = false;
   (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => domino(box.classList.contains("deja")));
-  // l'animation (givre, domino, sapin) se joue à chaque ouverture de la page
+  // l'animation (givre, domino, sapin) ne se joue qu'à la première ouverture de la journée ;
+  // les fois suivantes, le bandeau s'affiche directement dans son état final (« IT'S TIME » + sapin décoré)
+  const cle = "bl_noel_vu_" + now.toLocaleDateString("sv-SE");
+  if(store.get(cle) && !apercu) box.classList.add("deja"); else store.set(cle, "1");
   // quelques flocons
   $("#noelFlocons").innerHTML = Array.from({ length: 28 }, () =>
     `<i style="left:${Math.random() * 100}%;--t:${2 + Math.random() * 3}px;--d:${6 + Math.random() * 8}s;--r:-${Math.random() * 12}s;--x:${(Math.random() * 60 - 30).toFixed(0)}px"></i>`).join("");
