@@ -220,6 +220,20 @@
   .annonce{margin:-20px 0 36px;padding:14px 20px;border-left:3px solid var(--red);background:var(--tile);
            border-radius:0 12px 12px 0;line-height:1.5;white-space:pre-line}
 
+  /* La une du jour (visuel ponctuel) */
+  .une{margin:-12px 0 32px;background:var(--tile);border:1px solid var(--line);border-radius:20px;padding:14px 14px 16px;
+       animation:une-entree .7s cubic-bezier(.2,.8,.2,1) both}
+  .une[hidden]{display:none}
+  @keyframes une-entree{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+  .une-tete{display:flex;align-items:center;gap:12px;padding:0 4px 12px}
+  .une-kicker{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#fff;background:var(--red);padding:5px 10px;border-radius:999px;font-weight:600}
+  .une-legende{flex:1;color:var(--muted);font-size:14px}
+  .une-legende b{color:var(--fg);font-weight:600}
+  .une-cadre{display:block;width:100%;padding:0;border:0;background:#000;border-radius:14px;overflow:hidden;cursor:zoom-in}
+  .une-cadre img{display:block;width:100%;max-height:56vh;object-fit:contain;margin:0 auto}
+  .une-zoom{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.92);display:grid;place-items:center;cursor:zoom-out;padding:20px}
+  .une-zoom img{max-width:100%;max-height:100%;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+
   /* Soirée de Noël — « It's time » */
   .noel{position:relative;overflow:hidden;margin:-12px 0 36px;border-radius:20px;border:1px solid #2a0000;
        background:radial-gradient(120% 140% at 0% 0%,#3a0000 0%,#120000 45%,#000 75%);padding:28px 32px;
@@ -320,6 +334,15 @@
 <form class="search" action="https://www.google.com/search" method="get">
   <input name="q" placeholder="Rechercher sur Google…" autocomplete="off" autofocus>
 </form>
+
+<section class="une" id="une" hidden aria-label="La une du jour">
+  <div class="une-tete">
+    <span class="une-kicker">La une du jour</span>
+    <span class="une-legende" id="uneLegende"></span>
+    <button type="button" class="t-close" id="uneFermer" aria-label="Masquer pour aujourd'hui" title="Masquer pour aujourd'hui">×</button>
+  </div>
+  <button type="button" class="une-cadre" id="uneOuvrir" aria-label="Voir en grand"><img id="uneImg" alt=""></button>
+</section>
 
 <section class="noel" id="noel" hidden aria-label="Soirée de Noël">
   <div class="noel-flocons" id="noelFlocons"></div>
@@ -543,6 +566,15 @@ const CEMANTIX_SEMAINES = 51;   // nombre de fichiers sXXX.bin (51 semaines de m
 // MESSAGE POUR TOUT LE MONDE — s'affiche en bandeau sous la recherche.
 // Laisser vide ("") pour ne rien afficher.
 const MESSAGE = "";
+
+// LA UNE DU JOUR — un visuel affiché en grand sous la recherche, sur une période donnée.
+// image : fichier déposé à côté de la page sur GitHub (attention : le dépôt est public).
+const UNE = {
+  image: "une-du-jour.jpg",
+  du: "2026-11-19T00:00",
+  au: "2026-11-19T23:59",
+  legende: "Bon retour <b>Guillemette</b> ! 👶",
+};
 
 // SOIRÉE DE NOËL — bandeau « It's time » sous la recherche.
 // Il apparaît à partir de « afficherDes » et disparaît tout seul après « fin ». actif: false = masqué.
@@ -1280,6 +1312,25 @@ function ecoute(x){
   dlgB.addEventListener("close", () => clearInterval(minuteur));
   charger(true).then(() => setTimeout(chargerPhotos, 4000));   // photos préchargées en arrière-plan, une seule fois par navigateur
   setInterval(() => { if(!document.hidden && !dlgB.open) charger(); }, 15 * 60000);
+})();
+
+// La une du jour
+(function(){
+  const box = $("#une");
+  if(!UNE.image) return;
+  const maintenant = Date.now(), apercu = location.hash === "#une";
+  if(!apercu && (maintenant < new Date(UNE.du) || maintenant > new Date(UNE.au))) return;
+  const cle = "bl_une_masquee_" + UNE.image + "_" + new Date().toLocaleDateString("sv-SE");
+  if(store.get(cle) && !apercu) return;
+  $("#uneImg").src = UNE.image;
+  $("#uneLegende").innerHTML = UNE.legende || "";
+  box.hidden = false;
+  $("#uneOuvrir").onclick = () => {
+    const z = document.createElement("div"); z.className = "une-zoom";
+    z.innerHTML = `<img src="${UNE.image}" alt="">`; z.onclick = () => z.remove();
+    document.body.appendChild(z);
+  };
+  $("#uneFermer").onclick = () => { store.set(cle, "1"); box.hidden = true; };
 })();
 
 // Photos du Lemon Summer Break
