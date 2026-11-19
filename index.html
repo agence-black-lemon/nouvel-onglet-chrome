@@ -570,7 +570,7 @@ const MESSAGE = "";
 // LA UNE DU JOUR — un visuel affiché en grand sous la recherche, sur une période donnée.
 // image : fichier déposé à côté de la page sur GitHub (attention : le dépôt est public).
 const UNE = {
-  image: "une-du-jour.jpg",
+  image: "Une couverture de magazine au bureau très colorée.png",
   du: "2026-11-19T00:00",
   au: "2026-11-19T23:59",
   legende: "Bon retour <b>Guillemette</b> ! 👶",
@@ -1322,12 +1322,12 @@ function ecoute(x){
   if(!apercu && (maintenant < new Date(UNE.du) || maintenant > new Date(UNE.au))) return;
   const cle = "bl_une_masquee_" + UNE.image + "_" + new Date().toLocaleDateString("sv-SE");
   if(store.get(cle) && !apercu) return;
-  $("#uneImg").src = UNE.image;
+  $("#uneImg").src = encodeURI(UNE.image);
   $("#uneLegende").innerHTML = UNE.legende || "";
   box.hidden = false;
   $("#uneOuvrir").onclick = () => {
     const z = document.createElement("div"); z.className = "une-zoom";
-    z.innerHTML = `<img src="${UNE.image}" alt="">`; z.onclick = () => z.remove();
+    z.innerHTML = `<img src="${encodeURI(UNE.image)}" alt="">`; z.onclick = () => z.remove();
     document.body.appendChild(z);
   };
   $("#uneFermer").onclick = () => { store.set(cle, "1"); box.hidden = true; };
