@@ -1129,10 +1129,35 @@ function ecoute(x){
 }
 
 // Pochette d'une reco (fournie par le script ; pour YouTube, déduite du lien en secours)
+const POCHETTES = (() => { try { return JSON.parse(store.get("bl_pochettes") || "{}"); } catch(e){ return {}; } })();
 function pochetteDe(x){
   if(x.pochette) return x.pochette;
   const yt = x.lien ? idYouTube(x.lien) : "";
-  return yt ? `https://i.ytimg.com/vi/${encodeURIComponent(yt)}/mqdefault.jpg` : "";
+  if(yt) return `https://i.ytimg.com/vi/${encodeURIComponent(yt)}/mqdefault.jpg`;
+  const sp = spotifyId(x.lien);
+  return sp && POCHETTES[sp] || "";
+}
+function spotifyId(lien){
+  const m = String(lien || "").match(/open\.spotify\.com\/(?:intl-[a-z-]+\/)?(track|album|playlist|episode)\/([A-Za-z0-9]+)/);
+  return m ? m[1] + "/" + m[2] : "";
+}
+// Secours côté navigateur : si le script n'a pas fourni la pochette d'un lien Spotify, on la demande directement à Spotify
+async function completerPochettes(liste){
+  let neuf = false;
+  await Promise.all(liste.map(async x => {
+    const sp = spotifyId(x.lien);
+    if(x.pochette || !sp || POCHETTES[sp]) return;
+    try {
+      const r = await fetch("https://open.spotify.com/oembed?url=" + encodeURIComponent("https://open.spotify.com/" + sp));
+      const j = await r.json();
+      if(j.thumbnail_url){ POCHETTES[sp] = j.thumbnail_url; neuf = true; }
+    } catch(e){}
+  }));
+  if(neuf){
+    const k = Object.keys(POCHETTES); k.slice(0, Math.max(0, k.length - 60)).forEach(c => delete POCHETTES[c]);
+    store.set("bl_pochettes", JSON.stringify(POCHETTES));
+  }
+  return neuf;
 }
 
 // Recos musicales : 3 recos de l'équipe par jour (proposées la semaine d'avant) + formulaire
@@ -1194,6 +1219,8 @@ function pochetteDe(x){
     if(CACHE && CACHE.reco){ d = CACHE.reco; dessiner(); }
     try { d = (await INIT).reco; } catch(e){ try { d = await api({ action: "reco", prenom: monPrenom() }); } catch(e2){} }
     dessiner();
+    const jour = d && d.jour && d.jour.length ? d.jour : secours;
+    if(await completerPochettes(jour)) dessiner();
   }
   async function envoyer(e){
     e.preventDefault();
