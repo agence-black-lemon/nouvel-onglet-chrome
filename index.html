@@ -172,6 +172,13 @@
        border-radius:999px;padding:6px 14px 6px 6px;font:inherit;font-size:13px;cursor:pointer}
   .rb-item:hover,.rb-item.actif{border-color:var(--red)}
   .rb-item .rb-play{width:24px;height:24px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font-size:10px;flex:none}
+  .rb-item{padding-left:5px}
+  .rb-cover{position:relative;width:38px;height:38px;border-radius:8px;background:#222 center/cover;flex:none;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+  .rb-cover i{position:absolute;right:-4px;bottom:-4px;width:18px;height:18px;border-radius:50%;background:var(--red);color:#fff;
+       font-style:normal;font-size:8px;display:grid;place-items:center;box-shadow:0 0 0 2px #141414}
+  .rb-item:hover .rb-cover{transform:scale(1.05)}
+  .rb-cover{transition:transform .2s}
+  .rb-item{border-radius:14px}
   .rb-item .rb-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .rb-item .rb-qui{color:var(--muted)}
   .rb-droite{display:flex;align-items:center;gap:12px;flex:none}
@@ -1120,6 +1127,13 @@ function ecoute(x){
   return `<a class="tool reco-play" href="${esc(url)}" target="_blank" rel="noopener"><div class="ico"><span>▶</span></div><div class="name">Écouter sur ${esc(nom)}</div></a>`;
 }
 
+// Pochette d'une reco (fournie par le script ; pour YouTube, déduite du lien en secours)
+function pochetteDe(x){
+  if(x.pochette) return x.pochette;
+  const yt = x.lien ? idYouTube(x.lien) : "";
+  return yt ? `https://i.ytimg.com/vi/${encodeURIComponent(yt)}/mqdefault.jpg` : "";
+}
+
 // Recos musicales : 3 recos de l'équipe par jour (proposées la semaine d'avant) + formulaire
 (function(){
   const box = $("#reco");
@@ -1134,7 +1148,8 @@ function ecoute(x){
       const choix = `<label class="reco-pf">J'écoute sur
         <select id="recoPf">${Object.keys(PLATEFORMES).map(k => `<option value="${k}"${k === maPlateforme() ? " selected" : ""}>${PLATEFORMES[k].nom}</option>`).join("")}</select></label>`;
       const items = jour.map((x, k) => `<button type="button" class="rb-item${k === actif ? " actif" : ""}" data-k="${k}">
-          <span class="rb-play">${k === actif ? "■" : "▶"}</span>
+          ${pochetteDe(x) ? `<span class="rb-cover" style="background-image:url('${esc(pochetteDe(x))}')"><i>${k === actif ? "■" : "▶"}</i></span>`
+                         : `<span class="rb-play">${k === actif ? "■" : "▶"}</span>`}
           <span class="rb-txt">${esc(x.titre || "La reco mystère")}${x.prenom ? ` <span class="rb-qui">· ${esc(x.prenom)}</span>` : ""}</span></button>`).join("");
       const x = jour[actif];
       bar.innerHTML = `<div class="rb-ligne">
